@@ -13,7 +13,7 @@ class App extends Component {
           <li className="fa-user"></li>
         </ul>
         <header className="App-header">
-          <h1 className="App-title">Welcome to Pitch3D</h1>
+          <h1 className="App-title">Welcome to 3D Tetris</h1>
         </header>
         <div className ="viewMain" id="viewMain">
           <VizViewer />
