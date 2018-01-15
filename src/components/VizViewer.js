@@ -6,63 +6,140 @@ var THREE = require('three')
 var OrbitControls = require('three-orbit-controls')(THREE)
 
 
-          let scene;
-          let camera;
-          let renderer;
-          let controls;
-        
+let scene;
+let camera;
+let renderer;
+let controls;
 
-    //3js functions 
-      const changeMaterial = (state) => {
-        const newState = { ...state }
-        newState.scene.getObjectByName('box').material.wireframe = !newState.scene.getObjectByName('box').material.wireframe
-        return newState
-      }
-      
-      
-      const rotate = (state) => {
-        const newState = { ...state }
-        let position = newState.scene.getObjectByName('box').position.y
-        if(position > 0.6){
-            newState.scene.getObjectByName('box').position.y =  newState.scene.getObjectByName('box').position.y - 0.05
-            newState.scene.getObjectByName('box2').position.y =  newState.scene.getObjectByName('box2').position.y - 0.05
+let ColumnTops = [] //store the resting position (top of the column) y value for each column in the 2d array of possible y values
+for (var i = 0; i<6; i++){
+    for (var p = 0; p<6; p++){
+        var obj = {};
+        obj.x = i;
+        obj.y = p;
+        obj.ColumnTop = 0.5;
+        ColumnTops.push(obj)
+    }
+}
+
+//define colors
+const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 });
+//...
+
+
+//Action Functions. Used in the redux reducer switch statement
+const updateFalling = (state) => {
+    const newState = { ...state }
+    
+    for(let i = 0; i<newState.blocks.length; i++){
+        let block = newState.blocks[i];
+        if (block.userData.status === 'falling'){
+            //find column height of current column
+            let GridXVal = block.position.x + 2.5;
+            let GridYVal = block.position.z + 2.5;
+            const index = newState.ColumnTops.findIndex(item => item.x === GridXVal && item.y === GridYVal);
+            let top = newState.ColumnTops[index].ColumnTop;
+
+            if(block.position.y > top){
+                newState.blocks[i].position.y = newState.blocks[i].position.y - 0.05
+            }
+            else{
+                newState.blocks[i].userData.status = 'resting'
+                newState.ColumnTops[index].ColumnTop += 1;
+            }
         }
-        return newState
-      }
-      
-        //REDUX REDUCER
-  const rootReducer = (state, action) => {
-      switch (action.type) {
-        case 'CHANGE_MATERIAL': {
-            const newState = changeMaterial(state)
-            return { ...newState, lastAction: 'CHANGE_MATERIAL' }
-         }
+    }
+    
+    return newState
+}
+
+const checkCompletedRows = (state) => {
+    const newState = { ...state }
+    
+    return newState
+}
+
+const newBlockGroup = (state) => {
+    const newState = { ...state }
+    //every group has four blocks and starting position
+    const geometry = new THREE.BoxGeometry(1, 1, 1);
+    const box1 = new THREE.Mesh(geometry, materialOrange);
+    const box2 = new THREE.Mesh(geometry, materialOrange);
+    const box3 = new THREE.Mesh(geometry, materialOrange);
+    const box4 = new THREE.Mesh(geometry, materialOrange);
+    box2.userData.status = 'falling';
+    box3.userData.status = 'falling';
+    box4.userData.status = 'falling';
+    
+    box1.position.y = 20 ;
+    box1.position.x = 2.5;
+    box1.position.z = 2.5;
+
+    switch(newState.nextGroupType){
+        case '4VERTICAL' : {
+            box2.position.y = box1.position.y + 1;
+            box2.position.x = box1.position.x;
+            box2.position.z = box1.position.z;
+            
+            box3.position.y = box2.position.y + 1;
+            box3.position.x = box1.position.x;
+            box3.position.z = box1.position.z;
+           
+            box4.position.y = box3.position.y + 1;
+            box4.position.x = box1.position.x;
+            box4.position.z = box1.position.z;
+        }
+    }
+    box1.userData.status = 'falling'; //box status property is used to denote its state of 'falling' or 'resting'
+    newState.scene.add(box1);
+    newState.blocks.push(box1);
+    newState.scene.add(box2);
+    newState.blocks.push(box2);
+    newState.scene.add(box3);
+    newState.blocks.push(box3);
+    newState.scene.add(box4);
+    newState.blocks.push(box4);
+    return newState;
+}
+
+//REDUX REDUCER
+const rootReducer = (state, action) => {
+    switch (action.type) {
+        case 'ADD_BLOCK_GROUP' : {
+            const newState = newBlockGroup(state);
+            return { ...newState, lastAction: 'newBlockGroup' }
+        }
         case 'UPDATE': {
-            const newState = rotate(state)
-            return { ...newState, lastAction: 'UPDATE' }
-         }
-         case 'init3js' : {
+            const newState = updateFalling(state)
+            const finalState = checkCompletedRows(newState)
+            return { ...finalState, lastAction: 'UPDATE' }
+        }
+        case 'init3js' : {
             const initState = {
-              scene,
-              camera,
-              lastAction: ''
+                scene,
+                camera,
+                lastAction: '',
+                blocks: [],
+                ColumnTops: ColumnTops,
+                nextGroupType: '4VERTICAL'
             }
-            console.log("new state:", initState);
             return initState;
-         }
-         default:
-            return state
-         }
-  }
-  //REDUX REDUCER ^
-        const store = createStore(rootReducer, this.state)
-        
-         const render3js = () => {
-            if(store.getState().lastAction === 'UPDATE'){
-              renderer.render(store.getState().scene, store.getState().camera);
-              requestAnimationFrame(() => store.dispatch({ type: 'UPDATE' }));
-            }
-          } 
+        }
+        default:
+            return state;
+    }
+}
+
+//Redux create store 
+const store = createStore(rootReducer, this.state)
+
+//Render loop
+const render3js = () => {
+    if(store.getState().lastAction === 'UPDATE'){
+        renderer.render(store.getState().scene, store.getState().camera);
+        requestAnimationFrame(() => store.dispatch({ type: 'UPDATE' }));
+    }
+} 
 
 
 
@@ -75,78 +152,36 @@ var OrbitControls = require('three-orbit-controls')(THREE)
 
 
 class VizViewer extends Component {
-    
-
-
-    
     constructor(props){
         super(props);
         this.AddBlock = this.AddBlock.bind(this)
         this.state = {};
     }
     
-    
     AddBlock(){
-        store.dispatch({type: 'CHANGE_MATERIAL'})
+        store.dispatch({type: 'ADD_BLOCK_GROUP'})
     }
     
     componentDidMount() {
         const height = this.divElement.clientHeight;
         this.setState({ height });
-        
         const container = this.divElement
-        console.log(container)
-        
         scene = new THREE.Scene();
-
-
-
-      var gridHelper = new THREE.GridHelper( 6, 6 );
-      scene.add( gridHelper );
-      const geometry = new THREE.BoxGeometry(1, 1, 1);
-      const material = new THREE.MeshBasicMaterial({ color: 0xffa500 });
-      const box = new THREE.Mesh(geometry, material);
-        let geometry2 = new THREE.BoxGeometry(1, 1, 1);
-        let box2 = new THREE.Mesh(geometry2, material);
-        box2.position.y = 10;
-        box2.position.x = 1.5;
-        box2.position.z = 0.5
-        box2.name = 'box2'
-        scene.add(box2)
-        
-      box.name = 'box';
-      box.position.y = 10;
-      box.position.x = 0.5;
-      box.position.z = 0.5;
-      scene.add(box)
-      
-      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.z = -12;
-      camera.position.y = 5;
-      controls = new OrbitControls( camera );
-      //controls.addEventListener( 'change', render3js );
-
-
-      renderer = new THREE.WebGLRenderer({ antialias: true })
-      renderer.setClearColor(0xf0ffff)
-      renderer.setSize(window.innerWidth, window.innerHeight)
-      container.appendChild(renderer.domElement);     
-
-      store.dispatch({ type: 'init3js' })
-
-      store.subscribe(render3js)
-
-      store.dispatch({ type: 'UPDATE' })
-        
+        var gridHelper = new THREE.GridHelper( 6, 6 );
+        scene.add( gridHelper );
+        camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = -25;
+        camera.position.y = 10;
+        controls = new OrbitControls( camera );
+        renderer = new THREE.WebGLRenderer({ antialias: true })
+        renderer.setClearColor(0xf0ffff)
+        renderer.setSize(window.innerWidth, window.innerHeight)
+        container.appendChild(renderer.domElement);     
+        store.dispatch({ type: 'init3js' })
+        store.subscribe(render3js)
+        store.dispatch({ type: 'UPDATE' })
     } 
     
-    
-    
-    
-    
-    
-
-
     render(){
        return (
            <div className="appContainer">
