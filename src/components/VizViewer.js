@@ -35,9 +35,11 @@ const updateFalling = (state) => {
         let block = newState.blocks[i];
         if (block.userData.status === 'falling'){
             //find column height of current column
+            console.log(block.userData)
             let GridXVal = block.position.x + 2.5;
             let GridYVal = block.position.z + 2.5;
             const index = newState.ColumnTops.findIndex(item => item.x === GridXVal && item.y === GridYVal);
+            console.log(index, GridXVal, GridXVal, 'index, grid vals')
             let top = newState.ColumnTops[index].ColumnTop;
 
             if(block.position.y > top){
@@ -55,13 +57,50 @@ const updateFalling = (state) => {
 
 const RotateXAxis = (state) => {
     const newState = { ...state }
-    console.log('rotate x axis requested')
+    let currentBlockGroup = [];
     for(let i = 0; i<newState.blocks.length; i++){
         let block = newState.blocks[i];
         if (block.userData.status === 'falling'){
-
+            currentBlockGroup.push(block)
         }
     }
+    //head facing is recorded as if viewing the block group when X-Axis is left-to-right, Y-Axis is top-to-bottom, and z axis increases as it goes further away from the viewer
+    //there are a total of 6 possible head positions and 4 possible zOrientations
+    
+    if(newState.currentFallingGroupType === '4VERTICAL'){
+        if(newState.headFacing == 'bottom'){
+            if(newState.zOrientation == 1){
+                console.log('entered translation section')
+                currentBlockGroup[1].position.x = currentBlockGroup[0].position.x - 1;
+                currentBlockGroup[1].position.y = currentBlockGroup[0].position.y;
+                
+                currentBlockGroup[2].position.x = currentBlockGroup[1].position.x - 1;
+                currentBlockGroup[2].position.y = currentBlockGroup[1].position.y;
+                
+                currentBlockGroup[3].position.x = currentBlockGroup[2].position.x - 1;
+                currentBlockGroup[3].position.y = currentBlockGroup[2].position.y;
+            }
+            //...
+        }
+        else if (newState.headFacing == 'left'){
+            
+        }
+        else if (newState.headFacing == 'top'){
+            
+        }
+        else if (newState.headFacing == 'right'){
+            
+        }
+        else if (newState.headFacing == 'out'){
+            
+        }
+        else if (newState.headFacing == 'in'){
+            
+        }
+    }
+
+    console.log('ended translation section, waiting to render')
+    
     return newState;
 }
 
@@ -79,6 +118,17 @@ const newBlockGroup = (state) => {
     const box2 = new THREE.Mesh(geometry, materialOrange);
     const box3 = new THREE.Mesh(geometry, materialOrange);
     const box4 = new THREE.Mesh(geometry, materialOrange);
+    
+    box1.userData.status = 'falling'; //box status property is used to denote its state of 'falling' or 'resting'
+    
+    //data for rotating group 
+    box1.userData.head = true;
+    box1.userData.headFacing = 'bottom'
+    box1.userData.zOrientation = '1' //zOrientation is increments clockwise. If you rotate 90 degrees clockwise, the zOrientation increments by one
+    
+    newState.headFacing = 'bottom';
+    newState.zOrientation = '1';
+    
     box2.userData.status = 'falling';
     box3.userData.status = 'falling';
     box4.userData.status = 'falling';
@@ -103,7 +153,7 @@ const newBlockGroup = (state) => {
             box4.position.z = box1.position.z;
         }
     }
-    box1.userData.status = 'falling'; //box status property is used to denote its state of 'falling' or 'resting'
+    
     newState.scene.add(box1);
     newState.blocks.push(box1);
     newState.scene.add(box2);
