@@ -25,7 +25,7 @@ for (var i = 0; i<6; i++){
 //define colors
 const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 });
 //...
-
+//...
 
 //Action Functions. Used in the redux reducer switch statement
 const updateFalling = (state) => {
