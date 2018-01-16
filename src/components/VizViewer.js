@@ -41,7 +41,7 @@ const updateFalling = (state) => {
             let top = newState.ColumnTops[index].ColumnTop;
 
             if(block.position.y > top){
-                newState.blocks[i].position.y = newState.blocks[i].position.y - 0.05
+                newState.blocks[i].position.y = newState.blocks[i].position.y - 0.02
             }
             else{
                 newState.blocks[i].userData.status = 'resting'
@@ -51,6 +51,18 @@ const updateFalling = (state) => {
     }
     
     return newState
+}
+
+const RotateXAxis = (state) => {
+    const newState = { ...state }
+    console.log('rotate x axis requested')
+    for(let i = 0; i<newState.blocks.length; i++){
+        let block = newState.blocks[i];
+        if (block.userData.status === 'falling'){
+
+        }
+    }
+    return newState;
 }
 
 const checkCompletedRows = (state) => {
@@ -77,6 +89,7 @@ const newBlockGroup = (state) => {
 
     switch(newState.nextGroupType){
         case '4VERTICAL' : {
+            newState.currentFallingGroupType = '4VERTICAL';
             box2.position.y = box1.position.y + 1;
             box2.position.x = box1.position.x;
             box2.position.z = box1.position.z;
@@ -107,7 +120,11 @@ const rootReducer = (state, action) => {
     switch (action.type) {
         case 'ADD_BLOCK_GROUP' : {
             const newState = newBlockGroup(state);
-            return { ...newState, lastAction: 'newBlockGroup' }
+            return { ...newState, lastAction: 'ADD_BLOCK_GROUP' }
+        }
+        case 'ROTATE_X_AXIS' : {
+            const newState = RotateXAxis(state);
+            return { ...newState, lastAction: 'ROTATE_X_AXIS' }
         }
         case 'UPDATE': {
             const newState = updateFalling(state)
@@ -121,6 +138,7 @@ const rootReducer = (state, action) => {
                 lastAction: '',
                 blocks: [],
                 ColumnTops: ColumnTops,
+                currentFallingGroupType: '4VERTICAL',
                 nextGroupType: '4VERTICAL'
             }
             return initState;
@@ -155,7 +173,17 @@ class VizViewer extends Component {
     constructor(props){
         super(props);
         this.AddBlock = this.AddBlock.bind(this)
+        this.RotateYAxis = this.RotateYAxis.bind(this)
+        this.RotateXAxis = this.RotateXAxis.bind(this)
         this.state = {};
+    }
+    
+    RotateYAxis(){
+        store.dispatch({type: 'ROTATE_Y_AXIS'})
+    }
+    
+    RotateXAxis(){
+        store.dispatch({type: 'ROTATE_X_AXIS'})
     }
     
     AddBlock(){
@@ -167,10 +195,13 @@ class VizViewer extends Component {
         this.setState({ height });
         const container = this.divElement
         scene = new THREE.Scene();
-        var gridHelper = new THREE.GridHelper( 6, 6 );
-        scene.add( gridHelper );
+        var gridHelperBottom = new THREE.GridHelper( 6, 6 );
+        var gridHelperTop = new THREE.GridHelper( 6, 6 );
+        gridHelperTop.position.y = 20;
+        scene.add( gridHelperBottom );
+        scene.add( gridHelperTop );
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = -25;
+        camera.position.z = -35;
         camera.position.y = 10;
         controls = new OrbitControls( camera );
         renderer = new THREE.WebGLRenderer({ antialias: true })
@@ -189,8 +220,8 @@ class VizViewer extends Component {
                 <div className="vizContainer" ref={ (divElement) => this.divElement = divElement}>
                 </div>
                 <Button color="primary" onClick={this.AddBlock}>button</Button>
-                <Button color="danger">button</Button>
-                <Button color="accent">button</Button>
+                <Button color="danger" onClick={this.RotateYAxis}>Rotate Y Axis</Button>
+                <Button color="accent" onClick={this.RotateXAxis}>Rotate X Axis</Button>
           </div>
         )
     }
