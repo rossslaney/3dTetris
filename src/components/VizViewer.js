@@ -2,6 +2,9 @@ import React, { Component } from 'react';
 import { createStore } from 'redux'
 import { Button } from 'muicss/react';
 
+import * as RotateFunctions from "./RotateFunctions";
+// ^ To use e.g. RotateFunctions.4VERTICAL_FACING_BOTTOM_Z_1(params, ...)
+
 var THREE = require('three')
 var OrbitControls = require('three-orbit-controls')(THREE)
 
@@ -27,7 +30,7 @@ const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 });
 //...
 //...
 
-//Action Functions. Used in the redux reducer switch statement
+
 const updateFalling = (state) => {
     const newState = { ...state }
     
@@ -35,11 +38,9 @@ const updateFalling = (state) => {
         let block = newState.blocks[i];
         if (block.userData.status === 'falling'){
             //find column height of current column
-            console.log(block.userData)
             let GridXVal = block.position.x + 2.5;
             let GridYVal = block.position.z + 2.5;
             const index = newState.ColumnTops.findIndex(item => item.x === GridXVal && item.y === GridYVal);
-            console.log(index, GridXVal, GridXVal, 'index, grid vals')
             let top = newState.ColumnTops[index].ColumnTop;
 
             if(block.position.y > top){
@@ -70,7 +71,6 @@ const RotateXAxis = (state) => {
     if(newState.currentFallingGroupType === '4VERTICAL'){
         if(newState.headFacing == 'bottom'){
             if(newState.zOrientation == 1){
-                console.log('entered translation section')
                 currentBlockGroup[1].position.x = currentBlockGroup[0].position.x - 1;
                 currentBlockGroup[1].position.y = currentBlockGroup[0].position.y;
                 
