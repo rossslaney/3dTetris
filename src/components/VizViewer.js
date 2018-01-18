@@ -14,16 +14,6 @@ let camera;
 let renderer;
 let controls;
 
-let ColumnTops = [] //store the resting position (top of the column) y value for each column in the 2d array of possible y values
-for (var i = 0; i<6; i++){
-    for (var p = 0; p<6; p++){
-        var obj = {};
-        obj.x = i;
-        obj.y = p;
-        obj.ColumnTop = 0.5;
-        ColumnTops.push(obj)
-    }
-}
 
 //define colors
 const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 });
@@ -33,22 +23,28 @@ const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 });
 
 const updateFalling = (state) => {
     const newState = { ...state }
-    
+    let currentBlockGroup = [];
     for(let i = 0; i<newState.blocks.length; i++){
         let block = newState.blocks[i];
         if (block.userData.status === 'falling'){
-            //find column height of current column
-            let GridXVal = block.position.x + 2.5;
-            let GridYVal = block.position.z + 2.5;
-            const index = newState.ColumnTops.findIndex(item => item.x === GridXVal && item.y === GridYVal);
-            let top = newState.ColumnTops[index].ColumnTop;
 
             if(block.position.y > top){
                 newState.blocks[i].position.y = newState.blocks[i].position.y - 0.02
             }
+            
             else{
-                newState.blocks[i].userData.status = 'resting'
-                newState.ColumnTops[index].ColumnTop += 1;
+                //set block state
+                block.userData.status = 'resting'
+                
+                //round the height of block to the nearest tenth (it goes below by about .02 because the time it takes between frames)
+                let number = block.position.y;
+                number = Math.max( Math.round(number * 10) / 10 ).toFixed(2);
+                console.log(number)
+                block.position.y = number
+                
+                
+                
+                //newState.ColumnTops[index].ColumnTop += 1;
             }
         }
     }
@@ -187,7 +183,6 @@ const rootReducer = (state, action) => {
                 camera,
                 lastAction: '',
                 blocks: [],
-                ColumnTops: ColumnTops,
                 currentFallingGroupType: '4VERTICAL',
                 nextGroupType: '4VERTICAL'
             }
