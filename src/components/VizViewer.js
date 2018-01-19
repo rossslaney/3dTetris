@@ -15,6 +15,59 @@ let renderer;
 let controls;
 
 
+
+//REDUX REDUCER    --> only use these to interact with the state of the application
+const rootReducer = (state, action) => {
+    switch (action.type) {
+        case 'ADD_BLOCK_GROUP' : {
+            const newState = newBlockGroup(state);
+            return { ...newState, lastAction: 'ADD_BLOCK_GROUP' }
+        }
+        case 'ROTATE_ON_Z_AXIS' : {
+            const newState = RotateOnZAxis(state);
+            return { ...newState, lastAction: 'ROTATE_X_AXIS' }
+        }
+        case 'TRANSLATE_FALLING_GROUP' : {
+            const newState = TranslateFallingGroup(state, action.direction)
+            return { ...newState, lastAction: 'MOVE_FALLING_GROUP' }
+        }
+        case 'UPDATE': {
+            const newState = updateFalling(state)
+            const finalState = checkCompletedRows(newState)
+            return { ...finalState, lastAction: 'UPDATE' }
+        }
+        case 'init3js' : {
+            const initState = {
+                scene,
+                camera,
+                lastAction: '',
+                blocks: [],
+                currentFallingGroupType: '4VERTICAL',
+                nextGroupType: '4VERTICAL'
+            }
+            return initState;
+        }
+        default:
+            return state;
+    }
+}
+
+//Redux create store 
+const store = createStore(rootReducer, this.state)
+
+//Render loop
+const render3js = () => {
+    if(store.getState().lastAction === 'UPDATE'){
+        renderer.render(store.getState().scene, store.getState().camera);
+        requestAnimationFrame(() => store.dispatch({ type: 'UPDATE' }));
+    }
+} 
+
+
+
+
+
+
 //define colors
 const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 });
 //...
@@ -62,8 +115,9 @@ const updateFalling = (state) => {
     return newState
 }
 
-const RotateXAxis = (state) => {
+const RotateOnZAxis = (state) => {
     const newState = { ...state }
+    let finalState;
     let currentBlockGroup = [];
     for(let i = 0; i<newState.blocks.length; i++){
         let block = newState.blocks[i];
@@ -73,20 +127,13 @@ const RotateXAxis = (state) => {
     }
     //head facing is recorded as if viewing the block group when X-Axis is left-to-right, Y-Axis is top-to-bottom, and z axis increases as it goes further away from the viewer (from the initial orientation at application start)
     //there are a total of 6 possible head positions and 4 possible zOrientations
-    
     if(newState.currentFallingGroupType === '4VERTICAL'){
         if(newState.headFacing == 'bottom'){
             if(newState.zOrientation == 1){
-                currentBlockGroup[1].position.x = currentBlockGroup[0].position.x - 1;
-                currentBlockGroup[1].position.y = currentBlockGroup[0].position.y;
-                
-                currentBlockGroup[2].position.x = currentBlockGroup[1].position.x - 1;
-                currentBlockGroup[2].position.y = currentBlockGroup[1].position.y;
-                
-                currentBlockGroup[3].position.x = currentBlockGroup[2].position.x - 1;
-                currentBlockGroup[3].position.y = currentBlockGroup[2].position.y;
+                finalState = RotateFunctions.VERTICAL_FACING_BOTTOM_Z_1_ON_Z_AXIS(newState, currentBlockGroup)
             }
             //4VERTICAL zOrientation doesnt matter because of its shape
+            //... Will need to handle different zOrientations for different types of block groups
         }
         else if (newState.headFacing == 'left'){
             
@@ -107,7 +154,7 @@ const RotateXAxis = (state) => {
 
     console.log('ended translation section, waiting to render')
     
-    return newState;
+    return finalState;
 }
 
 const checkCompletedRows = (state) => {
@@ -314,53 +361,6 @@ const TranslateFallingGroup = (state, direction) => {
     return newState
 }
 
-//REDUX REDUCER
-const rootReducer = (state, action) => {
-    switch (action.type) {
-        case 'ADD_BLOCK_GROUP' : {
-            const newState = newBlockGroup(state);
-            return { ...newState, lastAction: 'ADD_BLOCK_GROUP' }
-        }
-        case 'ROTATE_X_AXIS' : {
-            const newState = RotateXAxis(state);
-            return { ...newState, lastAction: 'ROTATE_X_AXIS' }
-        }
-        case 'TRANSLATE_FALLING_GROUP' : {
-            const newState = TranslateFallingGroup(state, action.direction)
-            return { ...newState, lastAction: 'MOVE_FALLING_GROUP' }
-        }
-        case 'UPDATE': {
-            const newState = updateFalling(state)
-            const finalState = checkCompletedRows(newState)
-            return { ...finalState, lastAction: 'UPDATE' }
-        }
-        case 'init3js' : {
-            const initState = {
-                scene,
-                camera,
-                lastAction: '',
-                blocks: [],
-                currentFallingGroupType: '4VERTICAL',
-                nextGroupType: '4VERTICAL'
-            }
-            return initState;
-        }
-        default:
-            return state;
-    }
-}
-
-//Redux create store 
-const store = createStore(rootReducer, this.state)
-
-//Render loop
-const render3js = () => {
-    if(store.getState().lastAction === 'UPDATE'){
-        renderer.render(store.getState().scene, store.getState().camera);
-        requestAnimationFrame(() => store.dispatch({ type: 'UPDATE' }));
-    }
-} 
-
 
 
 
@@ -376,7 +376,7 @@ class VizViewer extends Component {
         super(props);
         this.AddBlock = this.AddBlock.bind(this)
         this.RotateYAxis = this.RotateYAxis.bind(this)
-        this.RotateXAxis = this.RotateXAxis.bind(this)
+        this.RotateOnZAxis = this.RotateOnZAxis.bind(this)
         this.state = {};
     }
     
@@ -384,8 +384,8 @@ class VizViewer extends Component {
         store.dispatch({type: 'ROTATE_Y_AXIS'})
     }
     
-    RotateXAxis(){
-        store.dispatch({type: 'ROTATE_X_AXIS'})
+    RotateOnZAxis(){
+        store.dispatch({type: 'ROTATE_ON_Z_AXIS'})
     }
     
     AddBlock(){
@@ -467,6 +467,14 @@ class VizViewer extends Component {
         geometry.vertices.push(new THREE.Vector3(0, 0, 10));
         var line = new THREE.Line(geometry, materialOrange);
         scene.add(line);
+        
+        var z = new THREE.Geometry();
+        z.vertices.push(new THREE.Vector3(1.5, 0, 5));
+        z.vertices.push(new THREE.Vector3(.5, 0, 5));
+        z.vertices.push(new THREE.Vector3(1.5, 0, 4.5));
+        z.vertices.push(new THREE.Vector3(.5, 0, 4.5));
+        var zline = new THREE.Line(z, materialOrange);
+        scene.add(zline);
         //Game Board Stuff ^
 
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -490,7 +498,7 @@ class VizViewer extends Component {
                 </div>
                 <Button color="primary" onClick={this.AddBlock}>button</Button>
                 <Button color="danger" onClick={this.RotateYAxis}>Rotate Y Axis</Button>
-                <Button color="accent" onClick={this.RotateXAxis}>Rotate X Axis</Button>
+                <Button color="accent" onClick={this.RotateOnZAxis}>Rotate On Z Axis</Button>
           </div>
         )
     }
