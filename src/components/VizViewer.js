@@ -426,11 +426,39 @@ class VizViewer extends Component {
         this.setState({ height });
         const container = this.divElement
         scene = new THREE.Scene();
+        
+        //Game Board stuff
         var gridHelperBottom = new THREE.GridHelper( 6, 6 );
         var gridHelperTop = new THREE.GridHelper( 6, 6 );
         gridHelperTop.position.y = 20;
         scene.add( gridHelperBottom );
         scene.add( gridHelperTop );
+        
+        var topLeftGeometry = new THREE.Geometry();
+        topLeftGeometry.vertices.push(new THREE.Vector3(3, 20, 3));
+        topLeftGeometry.vertices.push(new THREE.Vector3(3, 0, 3));
+        var topLeftLine = new THREE.Line(topLeftGeometry, materialOrange);
+        scene.add(topLeftLine);
+        
+        var topRightGeometry = new THREE.Geometry();
+        topRightGeometry.vertices.push(new THREE.Vector3(-3, 20, 3));
+        topRightGeometry.vertices.push(new THREE.Vector3(-3, 0, 3));
+        var topRightLine = new THREE.Line(topRightGeometry, materialOrange);
+        scene.add(topRightLine);
+        
+        var botLeftGeometry = new THREE.Geometry();
+        botLeftGeometry.vertices.push(new THREE.Vector3(3, 20, -3));
+        botLeftGeometry.vertices.push(new THREE.Vector3(3, 0, -3));
+        var botLeftLine = new THREE.Line(botLeftGeometry, materialOrange);
+        scene.add(botLeftLine);
+        
+        var botRightGeometry = new THREE.Geometry();
+        botRightGeometry.vertices.push(new THREE.Vector3(-3, 20, -3));
+        botRightGeometry.vertices.push(new THREE.Vector3(-3, 0, -3));
+        var botRightLine = new THREE.Line(botRightGeometry, materialOrange);
+        scene.add(botRightLine);
+        //Game Board Stuff ^
+
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         camera.position.z = -35;
         camera.position.y = 10;
