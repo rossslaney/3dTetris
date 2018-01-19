@@ -244,6 +244,66 @@ const TranslateFallingGroup = (state, direction) => {
             }
             break;
         }
+        case 'up-x-axis' : {
+            let checkValidMove = true //need to check if any block leaves the game board or runs into another block
+            let currentBlockGroup = [];
+            for(let i = 0; i<newState.blocks.length; i++){
+                let block = newState.blocks[i];
+                if (block.userData.status === 'falling'){
+                    currentBlockGroup.push(block)
+                }
+            }
+            for(let i = 0; i<currentBlockGroup.length; i++){
+                if(currentBlockGroup[i].position.x + 1 > 2.5){
+                    checkValidMove = false;
+                }
+            }
+            //compare each of the currently falling blocks to every state block that is resting
+            for(let i = 0; i<currentBlockGroup.length; i++){
+                let block = currentBlockGroup[i]
+                for(let p = 0; p<newState.blocks.length; p++){
+                    if(newState.blocks[p].userData.status === 'resting' && block.position.x + 1 >= newState.blocks[p].position.x && block.position.z == newState.blocks[p].position.z && Math.abs(block.position.y - newState.blocks[p].position.y) < 1){
+                        checkValidMove = false
+                    }
+                }
+            }
+            if(checkValidMove == true){
+                for(let i = 0; i<currentBlockGroup.length; i++){
+                    currentBlockGroup[i].position.x += 1;
+                }                
+            }
+            break;
+        }
+        case 'down-x-axis' : {
+            let checkValidMove = true //need to check if any block leaves the game board or runs into another block
+            let currentBlockGroup = [];
+            for(let i = 0; i<newState.blocks.length; i++){
+                let block = newState.blocks[i];
+                if (block.userData.status === 'falling'){
+                    currentBlockGroup.push(block)
+                }
+            }
+            for(let i = 0; i<currentBlockGroup.length; i++){
+                if(currentBlockGroup[i].position.x - 1 < -2.5){
+                    checkValidMove = false;
+                }
+            }
+            //compare each of the currently falling blocks to every state block that is resting
+            for(let i = 0; i<currentBlockGroup.length; i++){
+                let block = currentBlockGroup[i]
+                for(let p = 0; p<newState.blocks.length; p++){
+                    if(newState.blocks[p].userData.status === 'resting' && block.position.x - 1 <= newState.blocks[p].position.x && block.position.z == newState.blocks[p].position.z && Math.abs(block.position.y - newState.blocks[p].position.y) < 1){
+                        checkValidMove = false
+                    }
+                }
+            }
+            if(checkValidMove == true){
+                for(let i = 0; i<currentBlockGroup.length; i++){
+                    currentBlockGroup[i].position.x -= 1;
+                }                
+            }
+            break;
+        }
         
         default: 
             break;
@@ -342,8 +402,14 @@ class VizViewer extends Component {
             case 87: //w key
                 store.dispatch({type: 'TRANSLATE_FALLING_GROUP', direction: 'up-z-axis'})
                 break;
-            case 83: //w key
+            case 83: //s key
                 store.dispatch({type: 'TRANSLATE_FALLING_GROUP', direction: 'down-z-axis'})
+                break;
+            case 65: //a key
+                store.dispatch({type: 'TRANSLATE_FALLING_GROUP', direction: 'up-x-axis'})
+                break;
+            case 68: //d key
+                store.dispatch({type: 'TRANSLATE_FALLING_GROUP', direction: 'down-x-axis'})
                 break;
             default: 
                 break;
