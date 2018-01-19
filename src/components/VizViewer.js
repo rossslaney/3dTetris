@@ -23,42 +23,37 @@ const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 });
 
 const updateFalling = (state) => {
     const newState = { ...state }
-    let currentBlockGroup = [];
     for(let i = 0; i<newState.blocks.length; i++){
         let block = newState.blocks[i];
         if (block.userData.status === 'falling'){
-            
             let stillFall = true;
-            //check resting blocks if falling block is 1 above any resting blocks
-            for(let p = 0; p<newState.blocks.length; p++){
-                let checkBlock = newState.blocks[p]
-                if (block.position.x == checkBlock.position.x && block.position.z == checkBlock.position.z && block.position.y < checkBlock.position.y + 1 && checkBlock.userData.status === 'resting'){
-                    console.log('stillfall set here')
-                    stillFall = false;
-                    break;
-                }
-            }
-            
-            
             //catch all blocks that reach the bottom
             if(block.position.y < 0.5){
                 stillFall = false;
             }
-            
-            
-            
+            else{
+                //check resting blocks if falling block is 1 above any resting blocks
+                for(let p = 0; p<newState.blocks.length; p++){
+                    let checkBlock = newState.blocks[p]
+                    if (block != checkBlock && block.position.x == checkBlock.position.x && block.position.z == checkBlock.position.z && block.position.y < checkBlock.position.y + 1 && checkBlock.userData.status === 'resting'){
+                        stillFall = false;
+                        break;
+                    }
+                }
+            }
             if(stillFall == true){
-                console.log(stillFall)
-                block.position.y = block.position.y - 0.02
+                block.position.y = block.position.y - 0.04
             }
             else{
-                //set block state
-                block.userData.status = 'resting'
-                //round the height of block to the nearest tenth (it goes below by about .02 because the time it takes between frames)
-                let number = block.position.y;
-                number = Math.max( Math.round(number * 10) / 10 ).toFixed(2);
-                console.log(number)
-                block.position.y = number
+                //set all falling blocks to resting
+                for(let p = 0; p<newState.blocks.length; p++){
+                    newState.blocks[p].userData.status = 'resting'
+                    /*
+                    let y = newState.blocks[p].position.y
+                    y = Math.max( Math.round(y * 10) / 10 ).toFixed(2);
+                    newState.blocks[p].position.y = y
+                    */
+                }
             }
         }
     }
