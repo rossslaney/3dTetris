@@ -457,6 +457,16 @@ class VizViewer extends Component {
         botRightGeometry.vertices.push(new THREE.Vector3(-3, 0, -3));
         var botRightLine = new THREE.Line(botRightGeometry, materialOrange);
         scene.add(botRightLine);
+        
+        
+        var geometry = new THREE.Geometry();
+        geometry.vertices.push(new THREE.Vector3(0, 0, 3));
+        geometry.vertices.push(new THREE.Vector3(0, 0, 10));
+        geometry.vertices.push(new THREE.Vector3(2, 0, 7));
+        geometry.vertices.push(new THREE.Vector3(-2, 0, 7));
+        geometry.vertices.push(new THREE.Vector3(0, 0, 10));
+        var line = new THREE.Line(geometry, materialOrange);
+        scene.add(line);
         //Game Board Stuff ^
 
         camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
