@@ -23,41 +23,42 @@ const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 });
 
 const updateFalling = (state) => {
     const newState = { ...state }
-    for(let i = 0; i<newState.blocks.length; i++){
-        let block = newState.blocks[i];
-        if (block.userData.status === 'falling'){
-            let stillFall = true;
-            //catch all blocks that reach the bottom
-            if(block.position.y < 0.5){
-                stillFall = false;
-            }
-            else{
-                //check resting blocks if falling block is 1 above any resting blocks
-                for(let p = 0; p<newState.blocks.length; p++){
-                    let checkBlock = newState.blocks[p]
-                    if (block != checkBlock && block.position.x == checkBlock.position.x && block.position.z == checkBlock.position.z && block.position.y < checkBlock.position.y + 1 && checkBlock.userData.status === 'resting'){
-                        stillFall = false;
-                        break;
+    if(newState.blocks !== undefined && newState.blocks.length > 0){
+        for(let i = 0; i<newState.blocks.length; i++){
+            let block = newState.blocks[i];
+            if (block.userData.status === 'falling'){
+                let stillFall = true;
+                //catch all blocks that reach the bottom
+                if(block.position.y < 0.5){
+                    stillFall = false;
+                }
+                else{
+                    //check resting blocks if falling block is 1 above any resting blocks
+                    for(let p = 0; p<newState.blocks.length; p++){
+                        let checkBlock = newState.blocks[p]
+                        if (block != checkBlock && block.position.x == checkBlock.position.x && block.position.z == checkBlock.position.z && block.position.y < checkBlock.position.y + 1 && checkBlock.userData.status === 'resting'){
+                            stillFall = false;
+                            break;
+                        }
+                    }
+                }
+                if(stillFall == true){
+                    block.position.y = block.position.y - 0.04
+                }
+                else{
+                    //set all falling blocks to resting
+                    for(let p = 0; p<newState.blocks.length; p++){
+                        newState.blocks[p].userData.status = 'resting'
+                        /*
+                        let y = newState.blocks[p].position.y
+                        y = Math.max( Math.round(y * 10) / 10 ).toFixed(2);
+                        newState.blocks[p].position.y = y
+                        */
                     }
                 }
             }
-            if(stillFall == true){
-                block.position.y = block.position.y - 0.04
-            }
-            else{
-                //set all falling blocks to resting
-                for(let p = 0; p<newState.blocks.length; p++){
-                    newState.blocks[p].userData.status = 'resting'
-                    /*
-                    let y = newState.blocks[p].position.y
-                    y = Math.max( Math.round(y * 10) / 10 ).toFixed(2);
-                    newState.blocks[p].position.y = y
-                    */
-                }
-            }
-        }
+        }        
     }
-    
     return newState
 }
 
@@ -70,7 +71,7 @@ const RotateXAxis = (state) => {
             currentBlockGroup.push(block)
         }
     }
-    //head facing is recorded as if viewing the block group when X-Axis is left-to-right, Y-Axis is top-to-bottom, and z axis increases as it goes further away from the viewer
+    //head facing is recorded as if viewing the block group when X-Axis is left-to-right, Y-Axis is top-to-bottom, and z axis increases as it goes further away from the viewer (from the initial orientation at application start)
     //there are a total of 6 possible head positions and 4 possible zOrientations
     
     if(newState.currentFallingGroupType === '4VERTICAL'){
@@ -85,7 +86,7 @@ const RotateXAxis = (state) => {
                 currentBlockGroup[3].position.x = currentBlockGroup[2].position.x - 1;
                 currentBlockGroup[3].position.y = currentBlockGroup[2].position.y;
             }
-            //...
+            //4VERTICAL zOrientation doesnt matter because of its shape
         }
         else if (newState.headFacing == 'left'){
             
@@ -170,6 +171,89 @@ const newBlockGroup = (state) => {
     return newState;
 }
 
+const TranslateFallingGroup = (state, direction) => {
+    console.log(direction)
+    const newState = { ...state }
+    let currentBlockGroup = [];
+    for(let i = 0; i<newState.blocks.length; i++){
+        let block = newState.blocks[i];
+        if (block.userData.status === 'falling'){
+            currentBlockGroup.push(block)
+        }
+    }
+    
+    switch(direction){
+        case 'up-z-axis' : {
+            let checkValidMove = true //need to check if any block leaves the game board or runs into another block
+            let currentBlockGroup = [];
+            for(let i = 0; i<newState.blocks.length; i++){
+                let block = newState.blocks[i];
+                if (block.userData.status === 'falling'){
+                    currentBlockGroup.push(block)
+                }
+            }
+            for(let i = 0; i<currentBlockGroup.length; i++){
+                if(currentBlockGroup[i].position.z + 1 > 2.5){
+                    checkValidMove = false;
+                }
+            }
+            //compare each of the currently falling blocks to every state block that is resting
+            for(let i = 0; i<currentBlockGroup.length; i++){
+                let block = currentBlockGroup[i]
+                for(let p = 0; p<newState.blocks.length; p++){
+                    if(newState.blocks[p].userData.status === 'resting' && block.position.z + 1 >= newState.blocks[p].position.z && block.position.x == newState.blocks[p].position.x && Math.abs(block.position.y - newState.blocks[p].position.y) < 1){
+                        checkValidMove = false
+                    }
+                }
+            }
+            if(checkValidMove == true){
+                for(let i = 0; i<currentBlockGroup.length; i++){
+                    currentBlockGroup[i].position.z += 1;
+                }                
+            }
+            break;
+        }
+        
+        case 'down-z-axis' : {
+            let checkValidMove = true //need to check if any block leaves the game board or runs into another block
+            let currentBlockGroup = [];
+            for(let i = 0; i<newState.blocks.length; i++){
+                let block = newState.blocks[i];
+                if (block.userData.status === 'falling'){
+                    currentBlockGroup.push(block)
+                }
+            }
+            for(let i = 0; i<currentBlockGroup.length; i++){
+                if(currentBlockGroup[i].position.z - 1 < -2.5){
+                    checkValidMove = false;
+                }
+            }
+            //compare each of the currently falling blocks to every state block that is resting
+            for(let i = 0; i<currentBlockGroup.length; i++){
+                let block = currentBlockGroup[i]
+                for(let p = 0; p<newState.blocks.length; p++){
+                    if(newState.blocks[p].userData.status === 'resting' && block.position.z - 1 <= newState.blocks[p].position.z && block.position.x == newState.blocks[p].position.x && Math.abs(block.position.y - newState.blocks[p].position.y) < 1){
+                        checkValidMove = false
+                    }
+                }
+            }
+            if(checkValidMove == true){
+                for(let i = 0; i<currentBlockGroup.length; i++){
+                    currentBlockGroup[i].position.z -= 1;
+                }                
+            }
+            break;
+        }
+        
+        default: 
+            break;
+    }
+    
+    
+    
+    return newState
+}
+
 //REDUX REDUCER
 const rootReducer = (state, action) => {
     switch (action.type) {
@@ -180,6 +264,10 @@ const rootReducer = (state, action) => {
         case 'ROTATE_X_AXIS' : {
             const newState = RotateXAxis(state);
             return { ...newState, lastAction: 'ROTATE_X_AXIS' }
+        }
+        case 'TRANSLATE_FALLING_GROUP' : {
+            const newState = TranslateFallingGroup(state, action.direction)
+            return { ...newState, lastAction: 'MOVE_FALLING_GROUP' }
         }
         case 'UPDATE': {
             const newState = updateFalling(state)
@@ -242,6 +330,29 @@ class VizViewer extends Component {
     
     AddBlock(){
         store.dispatch({type: 'ADD_BLOCK_GROUP'})
+    }
+    
+   
+
+    _handleKeyDown = (event) => {
+        switch( event.keyCode ) {
+            case 27: //escape key
+                console.log(event.keyCode)
+                break;
+            case 87: //w key
+                store.dispatch({type: 'TRANSLATE_FALLING_GROUP', direction: 'up-z-axis'})
+                break;
+            case 83: //w key
+                store.dispatch({type: 'TRANSLATE_FALLING_GROUP', direction: 'down-z-axis'})
+                break;
+            default: 
+                break;
+        }
+    }
+
+
+    componentWillMount(){
+        document.addEventListener("keydown", this._handleKeyDown.bind(this));
     }
     
     componentDidMount() {
