@@ -10,21 +10,42 @@
 
 
 export const VERTICAL_FACING_BOTTOM_Z_1_ON_Z_AXIS = (newState, currentBlockGroup) => {
-    //check for bounds and for collisions with other blocks
+    let block1 = currentBlockGroup[0];
+    let block2 = currentBlockGroup[1];
+    let block3 = currentBlockGroup[2];
+    let block4 = currentBlockGroup[3];
+    console.log(block1.userData.head)
     
-    //check if rotation makes it go out of bounds
+    let validMove = true;
     
-    //then do the rotation
-    currentBlockGroup[1].position.x = currentBlockGroup[0].position.x - 1;
-    currentBlockGroup[1].position.y = currentBlockGroup[0].position.y;
-                
-    currentBlockGroup[2].position.x = currentBlockGroup[1].position.x - 1;
-    currentBlockGroup[2].position.y = currentBlockGroup[1].position.y;
-                
-    currentBlockGroup[3].position.x = currentBlockGroup[2].position.x - 1;
-    currentBlockGroup[3].position.y = currentBlockGroup[2].position.y;
+    for(let p = 0; p<newState.blocks.length; p++){
+        //check that block1 doesnt go out of bounds or collide with another block 
+        if(newState.blocks[p].userData.status === 'resting' && )
+        
+        //check that block2 doesnt go out of bounds or collide with another block 
+        if(newState.blocks[p].userData.status === 'resting' && )
+        
+        //check that block3 doesnt go out of bounds or collide with another block 
+        if(newState.blocks[p].userData.status === 'resting' && )
+        
+        //check that block4 doesnt go out of bounds or collide with another block 
+        if(newState.blocks[p].userData.status === 'resting' && )
+    }
     
-    newState.headFacing = 'left'
+    //if valid move, make rotation
+    if(validMove){
+        currentBlockGroup[1].position.x = currentBlockGroup[0].position.x - 1;
+        currentBlockGroup[1].position.y = currentBlockGroup[0].position.y;
+                    
+        currentBlockGroup[2].position.x = currentBlockGroup[1].position.x - 1;
+        currentBlockGroup[2].position.y = currentBlockGroup[1].position.y;
+                    
+        currentBlockGroup[3].position.x = currentBlockGroup[2].position.x - 1;
+        currentBlockGroup[3].position.y = currentBlockGroup[2].position.y;
+        
+        newState.headFacing = 'left'
+    }
+    
     return newState
 }
 

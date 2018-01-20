@@ -178,16 +178,7 @@ const newBlockGroup = (state) => {
 }
 
 const TranslateFallingGroup = (state, direction) => {
-    console.log(direction)
     const newState = { ...state }
-    let currentBlockGroup = [];
-    for(let i = 0; i<newState.blocks.length; i++){
-        let block = newState.blocks[i];
-        if (block.userData.status === 'falling'){
-            currentBlockGroup.push(block)
-        }
-    }
-    
     switch(direction){
         case 'down-y-axis' : {
             let checkValidMove = true //need to check if any block leaves the game board or runs into another block
