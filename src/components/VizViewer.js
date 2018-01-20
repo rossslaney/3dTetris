@@ -32,7 +32,7 @@ const rootReducer = (state, action) => {
             return { ...newState, lastAction: 'MOVE_FALLING_GROUP' }
         }
         case 'UPDATE': {
-            const newState = updateFalling(state)
+            const newState = TranslateFallingGroup(state, 'down-y-axis')
             const finalState = checkCompletedRows(newState)
             return { ...finalState, lastAction: 'UPDATE' }
         }
@@ -73,47 +73,6 @@ const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 });
 //...
 //...
 
-
-const updateFalling = (state) => {
-    const newState = { ...state }
-    if(newState.blocks !== undefined && newState.blocks.length > 0){
-        for(let i = 0; i<newState.blocks.length; i++){
-            let block = newState.blocks[i];
-            if (block.userData.status === 'falling'){
-                let stillFall = true;
-                //catch all blocks that reach the bottom
-                if(block.position.y < 0.5){
-                    stillFall = false;
-                }
-                else{
-                    //check resting blocks if falling block is 1 above any resting blocks
-                    for(let p = 0; p<newState.blocks.length; p++){
-                        let checkBlock = newState.blocks[p]
-                        if (block != checkBlock && block.position.x == checkBlock.position.x && block.position.z == checkBlock.position.z && block.position.y < checkBlock.position.y + 1 && checkBlock.userData.status === 'resting'){
-                            stillFall = false;
-                            break;
-                        }
-                    }
-                }
-                if(stillFall == true){
-                    block.position.y = block.position.y - 0.04
-                }
-                else{
-                    //set all falling blocks to resting
-                    for(let p = 0; p<newState.blocks.length; p++){
-                        newState.blocks[p].userData.status = 'resting'
-                        /*
-                        let y = newState.blocks[p].position.y
-                        y = Math.max( Math.round(y * 10) / 10 ).toFixed(2);
-                        newState.blocks[p].position.y = y
-                        */
-                    }
-                }
-            }
-        }        
-    }
-    return newState
-}
 
 const RotateOnZAxis = (state) => {
     const newState = { ...state }
@@ -230,6 +189,43 @@ const TranslateFallingGroup = (state, direction) => {
     }
     
     switch(direction){
+        case 'down-y-axis' : {
+            let checkValidMove = true //need to check if any block leaves the game board or runs into another block
+            let currentBlockGroup = [];
+            for(let i = 0; i<newState.blocks.length; i++){
+                let block = newState.blocks[i];
+                if (block.userData.status === 'falling'){
+                    currentBlockGroup.push(block)
+                }
+            }
+            for(let i = 0; i<currentBlockGroup.length; i++){
+                if(currentBlockGroup[i].position.y + 1 <= 1.5){
+                    checkValidMove = false;
+                }
+            }
+            //compare each of the currently falling blocks to every state block that is resting
+            for(let i = 0; i<currentBlockGroup.length; i++){
+                let block = currentBlockGroup[i]
+                for(let p = 0; p<newState.blocks.length; p++){
+                    if(newState.blocks[p].userData.status === 'resting' && block.position.z == newState.blocks[p].position.z && block.position.x == newState.blocks[p].position.x && Math.abs(block.position.y - newState.blocks[p].position.y) < 1){
+                        checkValidMove = false
+                    }
+                }
+            }
+            if(checkValidMove == true){
+                for(let i = 0; i<currentBlockGroup.length; i++){
+                    currentBlockGroup[i].position.y -= .04;
+                }                
+            }
+            else{
+                //set all currentBlockGroup to resting
+                for(let i = 0; i<currentBlockGroup.length; i++){
+                    currentBlockGroup[i].userData.status = 'resting'
+                }                    
+            }
+            break;
+        }
+        
         case 'up-z-axis' : {
             let checkValidMove = true //need to check if any block leaves the game board or runs into another block
             let currentBlockGroup = [];
@@ -360,13 +356,6 @@ const TranslateFallingGroup = (state, direction) => {
     
     return newState
 }
-
-
-
-
-
-
-
 
 
 
