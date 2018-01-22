@@ -55,7 +55,7 @@ const rootReducer = (state, action) => {
 //Redux create store 
 const store = createStore(rootReducer, this.state)
 
-//Render loop
+//Render loop (redux store.subscribe method calls this every time the store is updated... which creates a loop)
 const render3js = () => {
     if(store.getState().lastAction === 'UPDATE'){
         renderer.render(store.getState().scene, store.getState().camera);
@@ -69,8 +69,8 @@ const render3js = () => {
 
 
 //define colors
-const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 });
-//...
+const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 ,transparent: true, opacity: 0.5});
+
 //...
 
 
@@ -95,7 +95,7 @@ const RotateOnZAxis = (state) => {
             //... Will need to handle different zOrientations for different types of block groups
         }
         else if (newState.headFacing == 'left'){
-            
+            console.log('this got called')
         }
         else if (newState.headFacing == 'top'){
             
@@ -462,7 +462,7 @@ class VizViewer extends Component {
         camera.position.y = 10;
         controls = new OrbitControls( camera );
         renderer = new THREE.WebGLRenderer({ antialias: true })
-        renderer.setClearColor(0xf0ffff)
+        renderer.setClearColor(0x656868)
         renderer.setSize(window.innerWidth, window.innerHeight)
         container.appendChild(renderer.domElement);     
         store.dispatch({ type: 'init3js' })
