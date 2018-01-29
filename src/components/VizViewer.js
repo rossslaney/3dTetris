@@ -95,7 +95,7 @@ const RotateOnZAxis = (state) => {
             //... Will need to handle different zOrientations for different types of block groups
         }
         else if (newState.headFacing == 'left'){
-            console.log('this got called')
+            finalState = RotateFunctions.VERTICAL_FACING_LEFT_Z_1_ON_AXIS(newState, currentBlockGroup)
         }
         else if (newState.headFacing == 'top'){
             
