@@ -100,18 +100,6 @@ export const VERTICAL_FACING_BOTTOM_Z_1_ON_Z_AXIS = (newState, currentBlockGroup
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
 export const VERTICAL_FACING_LEFT_Z_1_ON_AXIS = (newState, currentBlockGroup) => {
     let block1 = currentBlockGroup[0];
     let block2 = currentBlockGroup[1];
