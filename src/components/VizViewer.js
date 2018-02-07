@@ -196,18 +196,29 @@ const RotateRightOnZAxis = (state) => {
 const RotateLeftOnZAxis = (state) => {
     let newState = { ...state }
     console.log(newState.currentFallingGroupType, newState.headFacing, newState.yRotation)
-    if(newState.currentFallingGroupType === '4VERTICAL' && newState.headFacing === 'bottom' && newState.yRotation === 1){
-        newState = changeBlocksState(newState, FourVert.FacingRight.YRotationOne)
-        if(newState.successOnRotate){
-            newState.headFacing = 'right'
+    switch(newState.currentFallingGroupType){
+        case '4VERTICAL' : {
+            switch(newState.headFacing){
+                case 'bottom' : {
+                    ///for 4Vertical we dont need a switch on yRotation, but other types will
+                    //switch(yRotation)
+                    newState = changeBlocksState(newState, FourVert.FacingRight.YRotationOne)
+                    if(newState.successOnRotate){
+                        newState.headFacing = 'right'
+                    }
+                    break;
+                }
+                case 'left' : {
+                    newState = changeBlocksState(newState, FourVert.FacingDown.YRotationOne)
+                    if(newState.successOnRotate){
+                        newState.headFacing = 'bottom'
+                    }
+                    break;
+                }
+            }
         }
     }
-    else if(newState.currentFallingGroupType === '4VERTICAL' && newState.headFacing === 'left' && newState.yRotation === 1){
-        newState = changeBlocksState(newState, FourVert.FacingDown.YRotationOne)
-        if(newState.successOnRotate){
-            newState.headFacing = 'bottom'
-        }
-    }
+    
     return newState;
 }
 
