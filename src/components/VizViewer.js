@@ -177,22 +177,36 @@ const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 ,transparen
  
 const RotateRightOnZAxis = (state) => {
     let newState = { ...state }
-    console.log('rotate right on  axis called')
     console.log(newState.currentFallingGroupType, newState.headFacing, newState.yRotation)
     if(newState.currentFallingGroupType === '4VERTICAL' && newState.headFacing === 'bottom' && newState.yRotation === 1){
         newState = changeBlocksState(newState, FourVert.FacingLeft.YRotationOne)
-        newState.headFacing = 'left'
+        if(newState.successOnRotate){
+            newState.headFacing = 'left'
+        }
+    }
+    else if(newState.currentFallingGroupType === '4VERTICAL' && newState.headFacing === 'right' && newState.yRotation === 1){
+        newState = changeBlocksState(newState, FourVert.FacingDown.YRotationOne)
+        if(newState.successOnRotate){
+            newState.headFacing = 'bottom'
+        }
     }
     return newState;
 }
 
 const RotateLeftOnZAxis = (state) => {
     let newState = { ...state }
-    console.log('rotate right on  axis called')
     console.log(newState.currentFallingGroupType, newState.headFacing, newState.yRotation)
     if(newState.currentFallingGroupType === '4VERTICAL' && newState.headFacing === 'bottom' && newState.yRotation === 1){
         newState = changeBlocksState(newState, FourVert.FacingRight.YRotationOne)
-        newState.headFacing = 'right'
+        if(newState.successOnRotate){
+            newState.headFacing = 'right'
+        }
+    }
+    else if(newState.currentFallingGroupType === '4VERTICAL' && newState.headFacing === 'left' && newState.yRotation === 1){
+        newState = changeBlocksState(newState, FourVert.FacingDown.YRotationOne)
+        if(newState.successOnRotate){
+            newState.headFacing = 'bottom'
+        }
     }
     return newState;
 }
@@ -279,7 +293,10 @@ const changeBlocksState = (finalState, newBlocksState) => {
         newState.currentBlockGroup[3].position.x = newState.currentBlockGroup[0].position.x + newBlocksState.block4.x
         newState.currentBlockGroup[3].position.y = newState.currentBlockGroup[0].position.y + newBlocksState.block4.y
         newState.currentBlockGroup[3].position.z = newState.currentBlockGroup[0].position.z + newBlocksState.block4.z
-                
+        newState.successOnRotate = true;
+    }
+    else{
+        newState.successOnRotate = false;
     }
     return newState;
 }
