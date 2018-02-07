@@ -23,9 +23,13 @@ const rootReducer = (state, action) => {
             const newState = newBlockGroup(state);
             return { ...newState, lastAction: 'ADD_BLOCK_GROUP' }
         }
-        case 'ROTATE_ON_Z_AXIS' : {
-            const newState = RotateOnZAxis(state);
-            return { ...newState, lastAction: 'ROTATE_X_AXIS' }
+        case 'ROTATE_RIGHT_ON_Z_AXIS' : {
+            const newState = RotateRightOnZAxis(state);
+            return { ...newState, lastAction: 'ROTATE_RIGHT_ON_Z_AXIS' }
+        }
+        case 'ROTATE_LEFT_ON_Z_AXIS' : {
+            const newState = RotateLeftOnZAxis(state);
+            return { ...newState, lastAction: 'ROTATE_LEFT_ON_Z_AXIS' }
         }
         case 'TRANSLATE_FALLING_GROUP' : {
             const newState = TranslateFallingGroup(state, action.direction)
@@ -74,214 +78,212 @@ const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 ,transparen
 //...
 
 
-const RotateOnZAxis = (state) => {
-    const newState = { ...state }
-    let currentBlockGroup = [];
-    for(let i = 0; i<newState.blocks.length; i++){
-        let block = newState.blocks[i];
-        if (block.userData.status === 'falling'){
-            currentBlockGroup.push(block)
+/*****************************************
+ * 
+ *    Allow 90 degree rotation on z a & x axis in both directions
+ *    
+ *    There is the standard set state where the block is facing down
+ *     
+ *    Then there is the facing right & left from z-axis rotations
+ *    and out & in from x-axis rotation
+ *        
+ *    
+ *      I think hard-coding in these states (as the blocks relate to the 'head' block) will save time
+ * 
+ *  After, I will add the four y-axis rotation states to each block group 
+ * 
+ * 
+ *  Y Values will start from the way it drops then increment by one for each 90 degree turn to the right (facing initial forward direction)
+ * 
+ * **************************************/
+ 
+ const FourVert = {
+     FacingDown : {
+         YRotationOne : {
+            //these store the positions of the block relative to the first block 
+             block1: {
+                 x: 0,
+                 y: 0,
+                 z: 0
+             },
+             block2: {
+                 x: 0,
+                 y: 1,
+                 z: 0
+             },
+             block3: {
+                 x: 0,
+                 y: 2,
+                 z: 0
+             },
+             block4: {
+                 x: 0,
+                 y: 3,
+                 z: 0
+             }      
+         }
+     },
+     FacingLeft : {
+         YRotationOne : {
+            //these store the positions of the block relative to the first block 
+             block1: {
+                 x: 0,
+                 y: 0,
+                 z: 0
+             },
+             block2: {
+                 x: -1,
+                 y: 0,
+                 z: 0
+             },
+             block3: {
+                 x: -2,
+                 y: 0,
+                 z: 0
+             },
+             block4: {
+                 x: -3,
+                 y: 0,
+                 z: 0
+             }           
+         }
+     },
+     FacingRight : {
+        YRotationOne : {
+            //these store the positions of the block relative to the first block 
+             block1: {
+                 x: 0,
+                 y: 0,
+                 z: 0
+             },
+             block2: {
+                 x: 1,
+                 y: 0,
+                 z: 0
+             },
+             block3: {
+                 x: 2,
+                 y: 0,
+                 z: 0
+             },
+             block4: {
+                 x: 3,
+                 y: 0,
+                 z: 0
+             }       
         }
+     }
+ }
+ 
+const RotateRightOnZAxis = (state) => {
+    let newState = { ...state }
+    console.log('rotate right on  axis called')
+    console.log(newState.currentFallingGroupType, newState.headFacing, newState.yRotation)
+    if(newState.currentFallingGroupType === '4VERTICAL' && newState.headFacing === 'bottom' && newState.yRotation === 1){
+        newState = changeBlocksState(newState, FourVert.FacingLeft.YRotationOne)
+        newState.headFacing = 'left'
     }
-    //head facing is recorded as if viewing the block group when X-Axis is left-to-right, Y-Axis is top-to-bottom, and z axis increases as it goes further away from the viewer (from the initial orientation at application start)
-    //there are a total of 6 possible head positions and 4 possible zOrientations
-    if(newState.currentFallingGroupType === '4VERTICAL'){
-        if(newState.headFacing == 'bottom'){
-            if(newState.zOrientation == 1){
-                   let block1 = currentBlockGroup[0];
-                    let block2 = currentBlockGroup[1];
-                    let block3 = currentBlockGroup[2];
-                    let block4 = currentBlockGroup[3];
-                    console.log(block1.userData.head)
-                    
-                    let validMove = true;
-                    let testPositionX;
-                    let testPositionY;
-                    let testPositionZ;
-                    for(let p = 0; p<newState.blocks.length; p++){
-                                //block 1 doesnt move in this rotation
-                                
-                                //block2
-                                testPositionX = block1.position.x - 1;
-                                testPositionY = block1.position.y;
-                                testPositionZ = block1.position.z;
-                                
-                                //check for collision with blocks[p]
-                                if(testPositionX == newState.blocks[p].position.x && Math.abs(testPositionY - newState.blocks[p].position.y) < 1 && testPositionZ == newState.blocks[p].position.z){
-                                    validMove = false; 
-                                    break;
-                                }
-                                
-                                //check out of bounds on x or z axis
-                                if(testPositionX > 2.5 || testPositionX < -2.5 || testPositionZ > 2.5 || testPositionZ < -2.5){
-                                    console.log('triggered out of bounds')
-                                    validMove = false; 
-                                    break;
-                                }
-                                
-                                
-                                //block 3
-                                testPositionX = block1.position.x - 2;
-                                testPositionY = block1.position.y;
-                                testPositionZ = block1.position.z;
-                                
-                                //check for collision with blocks[p]
-                                if(testPositionX == newState.blocks[p].position.x && Math.abs(testPositionY - newState.blocks[p].position.y) < 1 && testPositionZ == newState.blocks[p].position.z){
-                                    validMove = false; 
-                                    break;
-                                }
-                                
-                                //check out of bounds on x or z axis
-                                if(testPositionX > 2.5 || testPositionX < -2.5 || testPositionZ > 2.5 || testPositionZ < -2.5){
-                                    validMove = false; 
-                                    break;
-                                }
-                                
-                                //block 4
-                                testPositionX = block1.position.x - 3;
-                                testPositionY = block1.position.y;
-                                testPositionZ = block1.position.z;
-                                
-                                //check for collision with blocks[p]
-                                if(testPositionX == newState.blocks[p].position.x && Math.abs(testPositionY - newState.blocks[p].position.y) < 1 && testPositionZ == newState.blocks[p].position.z){
-                                    validMove = false; 
-                                    break;
-                                }
-                                
-                                //check out of bounds on x or z axis
-                                if(testPositionX > 2.5 || testPositionX < -2.5 || testPositionZ > 2.5 || testPositionZ < -2.5){
-                                    validMove = false; 
-                                    break;
-                                }
-                    }
-                    
-                    //if valid move, make rotation
-                    if(validMove){
-                        currentBlockGroup[1].position.x = currentBlockGroup[0].position.x - 1;
-                        currentBlockGroup[1].position.y = currentBlockGroup[0].position.y;
-                                    
-                        currentBlockGroup[2].position.x = currentBlockGroup[0].position.x - 2;
-                        currentBlockGroup[2].position.y = currentBlockGroup[0].position.y;
-                                    
-                        currentBlockGroup[3].position.x = currentBlockGroup[0].position.x - 3;
-                        currentBlockGroup[3].position.y = currentBlockGroup[0].position.y;
-                        
-                        //update state data and block data for future use
-                        newState.headFacing = 'left'
-                        block1.userData.facing = 'left'
-                    }
-    
-            }
-            //4VERTICAL zOrientation doesnt matter because of its shape
-            //... Will need to handle different zOrientations for different types of block groups
-        }
-        else if (newState.headFacing == 'left'){
-           // finalState = RotateFunctions.VERTICAL_FACING_LEFT_Z_1_ON_AXIS(newState, currentBlockGroup)
-               let block1 = currentBlockGroup[0];
-                let block2 = currentBlockGroup[1];
-                let block3 = currentBlockGroup[2];
-                let block4 = currentBlockGroup[3];
-                console.log(block1.userData.head)
-                
-                let validMove = true;
-                let testPositionX;
-                let testPositionY;
-                let testPositionZ;
-                for(let p = 0; p<newState.blocks.length; p++){
-                            //block 1 doesnt move in this rotation
-                            
-                            //block2
-                            testPositionX = block1.position.x;
-                            testPositionY = block1.position.y + 1;
-                            testPositionZ = block1.position.z;
-                            
-                            //check for collision with blocks[p]
-                            if(testPositionX == newState.blocks[p].position.x && Math.abs(testPositionY - newState.blocks[p].position.y) < 1 && testPositionZ == newState.blocks[p].position.z){
-                                validMove = false; 
-                                break;
-                            }
-                            
-                            //check out of bounds on x or z axis
-                            if(testPositionX > 2.5 || testPositionX < -2.5 || testPositionZ > 2.5 || testPositionZ < -2.5){
-                                console.log('triggered out of bounds')
-                                validMove = false; 
-                                break;
-                            }
-                            
-                            
-                            //block 3
-                            testPositionX = block1.position.x;
-                            testPositionY = block1.position.y + 2;
-                            testPositionZ = block1.position.z;
-                            
-                            //check for collision with blocks[p]
-                            if(testPositionX == newState.blocks[p].position.x && Math.abs(testPositionY - newState.blocks[p].position.y) < 1 && testPositionZ == newState.blocks[p].position.z){
-                                validMove = false; 
-                                break;
-                            }
-                            
-                            //check out of bounds on x or z axis
-                            if(testPositionX > 2.5 || testPositionX < -2.5 || testPositionZ > 2.5 || testPositionZ < -2.5){
-                                validMove = false; 
-                                break;
-                            }
-                            
-                            //block 4
-                            testPositionX = block1.position.x;
-                            testPositionY = block1.position.y + 3;
-                            testPositionZ = block1.position.z;
-                            
-                            //check for collision with blocks[p]
-                            if(testPositionX == newState.blocks[p].position.x && Math.abs(testPositionY - newState.blocks[p].position.y) < 1 && testPositionZ == newState.blocks[p].position.z){
-                                validMove = false; 
-                                break;
-                            }
-                            
-                            //check out of bounds on x or z axis
-                            if(testPositionX > 2.5 || testPositionX < -2.5 || testPositionZ > 2.5 || testPositionZ < -2.5){
-                                validMove = false; 
-                                break;
-                            }
-                }
-                
-                //if valid move, make rotation
-                if(validMove){
-                    currentBlockGroup[1].position.x = currentBlockGroup[0].position.x;
-                    currentBlockGroup[1].position.y = currentBlockGroup[0].position.y + 1;
-                                
-                    currentBlockGroup[2].position.x = currentBlockGroup[0].position.x;
-                    currentBlockGroup[2].position.y = currentBlockGroup[0].position.y + 2;
-                                
-                    currentBlockGroup[3].position.x = currentBlockGroup[0].position.x;
-                    currentBlockGroup[3].position.y = currentBlockGroup[0].position.y + 3;
-                    
-                    //update state data and block data for future use
-                    newState.headFacing = 'bottom'
-                    block1.userData.facing = 'bottom'
-                }
-    
-        }
-        else if (newState.headFacing == 'top'){
-            
-        }
-        else if (newState.headFacing == 'right'){
-            
-        }
-        else if (newState.headFacing == 'out'){
-            
-        }
-        else if (newState.headFacing == 'in'){
-            
-        }
-
-    }
-
-    console.log('ended translation section, waiting to render')
-    console.log(newState.blocks)
-
-    
     return newState;
 }
+
+const RotateLeftOnZAxis = (state) => {
+    let newState = { ...state }
+    console.log('rotate right on  axis called')
+    console.log(newState.currentFallingGroupType, newState.headFacing, newState.yRotation)
+    if(newState.currentFallingGroupType === '4VERTICAL' && newState.headFacing === 'bottom' && newState.yRotation === 1){
+        newState = changeBlocksState(newState, FourVert.FacingRight.YRotationOne)
+        newState.headFacing = 'right'
+    }
+    return newState;
+}
+
+//receives the current game state, and the proposed changed blocks state, and return finalState
+// POSITION OF BLOCK 1 NEVER CHANGES, all rotations are relative to block 1
+const changeBlocksState = (finalState, newBlocksState) => {
+    let newState = { ...finalState}
+    let validMove = true;
+    let testX;
+    let testY;
+    let testZ;
+    let restingBlocks = []
+    for(let i = 0; i<newState.blocks.length; i++){
+        if(newState.blocks[i].userData.status != 'falling'){
+            restingBlocks.push(newState.blocks[i])
+        }
+    }
+    for(let i = 0; i<restingBlocks.length; i++){
+        //test block 2 vs restingblocks[i]
+        testX = newState.currentBlockGroup[0].position.x + newBlocksState.block2.x
+        testY = newState.currentBlockGroup[0].position.y + newBlocksState.block2.y
+        testZ = newState.currentBlockGroup[0].position.z + newBlocksState.block2.z
+        
+        if(testX == restingBlocks[i].position.x && Math.abs(testY - restingBlocks[i].position.y) < 1 && testZ == restingBlocks[i].position.z){
+            validMove = false; 
+            break;
+        }
+                                
+        //test block 3
+        testX = newState.currentBlockGroup[0].position.x + newBlocksState.block3.x
+        testY = newState.currentBlockGroup[0].position.y + newBlocksState.block3.y
+        testZ = newState.currentBlockGroup[0].position.z + newBlocksState.block3.z
+        
+        if(testX == restingBlocks[i].position.x && Math.abs(testY - restingBlocks[i].position.y) < 1 && testZ == restingBlocks[i].position.z){
+            validMove = false; 
+            break;
+        }
+        
+        //test block 4
+        testX = newState.currentBlockGroup[0].position.x + newBlocksState.block4.x
+        testY = newState.currentBlockGroup[0].position.y + newBlocksState.block4.y
+        testZ = newState.currentBlockGroup[0].position.z + newBlocksState.block4.z
+        
+        if(testX == restingBlocks[i].position.x && Math.abs(testY - restingBlocks[i].position.y) < 1 && testZ == restingBlocks[i].position.z){
+            validMove = false; 
+            break;
+        }
+    }
+    //test block 2 ob
+    testX = newState.currentBlockGroup[0].position.x + newBlocksState.block2.x
+    testY = newState.currentBlockGroup[0].position.y + newBlocksState.block2.y
+    testZ = newState.currentBlockGroup[0].position.z + newBlocksState.block2.z
+    if(testX > 2.5 || testX < -2.5 || testZ > 2.5 || testZ < -2.5){
+        validMove = false; 
+    }        
+    //test block 3 ob
+    testX = newState.currentBlockGroup[0].position.x + newBlocksState.block3.x
+    testY = newState.currentBlockGroup[0].position.y + newBlocksState.block3.y
+    testZ = newState.currentBlockGroup[0].position.z + newBlocksState.block3.z
+    if(testX > 2.5 || testX < -2.5 || testZ > 2.5 || testZ < -2.5){
+        validMove = false; 
+    }     
+    //test block 4 ob
+    testX = newState.currentBlockGroup[0].position.x + newBlocksState.block4.x
+    testY = newState.currentBlockGroup[0].position.y + newBlocksState.block4.y
+    testZ = newState.currentBlockGroup[0].position.z + newBlocksState.block4.z
+    if(testX > 2.5 || testX < -2.5 || testZ > 2.5 || testZ < -2.5){
+        validMove = false; 
+    }     
+    
+    if(validMove){
+        //block 2
+        newState.currentBlockGroup[1].position.x = newState.currentBlockGroup[0].position.x + newBlocksState.block2.x
+        newState.currentBlockGroup[1].position.y = newState.currentBlockGroup[0].position.y + newBlocksState.block2.y
+        newState.currentBlockGroup[1].position.z = newState.currentBlockGroup[0].position.z + newBlocksState.block2.z
+    
+        //block 3
+        newState.currentBlockGroup[2].position.x = newState.currentBlockGroup[0].position.x + newBlocksState.block3.x
+        newState.currentBlockGroup[2].position.y = newState.currentBlockGroup[0].position.y + newBlocksState.block3.y
+        newState.currentBlockGroup[2].position.z = newState.currentBlockGroup[0].position.z + newBlocksState.block3.z
+        
+        //block 4 
+        newState.currentBlockGroup[3].position.x = newState.currentBlockGroup[0].position.x + newBlocksState.block4.x
+        newState.currentBlockGroup[3].position.y = newState.currentBlockGroup[0].position.y + newBlocksState.block4.y
+        newState.currentBlockGroup[3].position.z = newState.currentBlockGroup[0].position.z + newBlocksState.block4.z
+                
+    }
+    return newState;
+}
+
 
 const checkCompletedRows = (state) => {
     const newState = { ...state }
@@ -291,6 +293,7 @@ const checkCompletedRows = (state) => {
 
 const newBlockGroup = (state) => {
     const newState = { ...state }
+    newState.currentBlockGroup = []
     //every group has four blocks and starting position
     const geometry = new THREE.BoxGeometry(1, 1, 1);
     const box1 = new THREE.Mesh(geometry, materialOrange);
@@ -303,10 +306,9 @@ const newBlockGroup = (state) => {
     //data for rotating group 
     box1.userData.head = true;
     box1.userData.headFacing = 'bottom'
-    box1.userData.zOrientation = '1' //zOrientation is increments clockwise. If you rotate 90 degrees clockwise, the zOrientation increments by one
-    
+
     newState.headFacing = 'bottom';
-    newState.zOrientation = '1';
+    newState.yRotation = 1;
     
     box2.userData.status = 'falling';
     box3.userData.status = 'falling';
@@ -330,17 +332,22 @@ const newBlockGroup = (state) => {
             box4.position.y = box3.position.y + 1;
             box4.position.x = box1.position.x;
             box4.position.z = box1.position.z;
+            newState.scene.add(box1);
+            newState.blocks.push(box1);
+            newState.scene.add(box2);
+            newState.blocks.push(box2);
+            newState.scene.add(box3);
+            newState.blocks.push(box3);
+            newState.scene.add(box4);
+            newState.blocks.push(box4);
+            newState.currentBlockGroup.push(box1)
+            newState.currentBlockGroup.push(box2)
+            newState.currentBlockGroup.push(box3)
+            newState.currentBlockGroup.push(box4)
         }
     }
     
-    newState.scene.add(box1);
-    newState.blocks.push(box1);
-    newState.scene.add(box2);
-    newState.blocks.push(box2);
-    newState.scene.add(box3);
-    newState.blocks.push(box3);
-    newState.scene.add(box4);
-    newState.blocks.push(box4);
+
     return newState;
 }
 
@@ -355,6 +362,9 @@ const TranslateFallingGroup = (state, direction) => {
                 if (block.userData.status === 'falling'){
                     currentBlockGroup.push(block)
                 }
+            }
+            if(currentBlockGroup.length === 0){
+                newState.currentBlockGroup = [];
             }
             for(let i = 0; i<currentBlockGroup.length; i++){
                 if(currentBlockGroup[i].position.y + 1 <= 1.5){
@@ -517,13 +527,13 @@ const TranslateFallingGroup = (state, direction) => {
 
 
 
-
 class VizViewer extends Component {
     constructor(props){
         super(props);
         this.AddBlock = this.AddBlock.bind(this)
         this.RotateYAxis = this.RotateYAxis.bind(this)
-        this.RotateOnZAxis = this.RotateOnZAxis.bind(this)
+        this.RotateRightOnZAxis = this.RotateRightOnZAxis.bind(this)
+        this.RotateLeftOnZAxis = this.RotateLeftOnZAxis.bind(this)
         this.state = {};
     }
     
@@ -531,9 +541,14 @@ class VizViewer extends Component {
         store.dispatch({type: 'ROTATE_Y_AXIS'})
     }
     
-    RotateOnZAxis(){
-        store.dispatch({type: 'ROTATE_ON_Z_AXIS'})
+    RotateRightOnZAxis(){
+        store.dispatch({type: 'ROTATE_RIGHT_ON_Z_AXIS'})
     }
+    
+    RotateLeftOnZAxis(){
+        store.dispatch({type: 'ROTATE_LEFT_ON_Z_AXIS'})
+    }
+    
     
     AddBlock(){
         store.dispatch({type: 'ADD_BLOCK_GROUP'})
@@ -644,8 +659,8 @@ class VizViewer extends Component {
                 <div className="vizContainer" ref={ (divElement) => this.divElement = divElement}>
                 </div>
                 <Button color="primary" onClick={this.AddBlock}>button</Button>
-                <Button color="danger" onClick={this.RotateYAxis}>Rotate Y Axis</Button>
-                <Button color="accent" onClick={this.RotateOnZAxis}>Rotate On Z Axis</Button>
+                <Button color="danger" onClick={this.RotateLeftOnZAxis}>Rotate Left on Z Axis</Button>
+                <Button color="accent" onClick={this.RotateRightOnZAxis}>Rotate Right On Z Axis</Button>
           </div>
         )
     }
