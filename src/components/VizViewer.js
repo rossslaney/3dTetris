@@ -2,8 +2,6 @@ import React, { Component } from 'react';
 import { createStore } from 'redux'
 import { Button } from 'muicss/react';
 
-import * as RotateFunctions from "./RotateFunctions";
-// ^ To use e.g. RotateFunctions.4VERTICAL_FACING_BOTTOM_Z_1(params, ...)
 
 var THREE = require('three')
 var OrbitControls = require('three-orbit-controls')(THREE)
@@ -46,8 +44,8 @@ const rootReducer = (state, action) => {
                 camera,
                 lastAction: '',
                 blocks: [],
-                currentFallingGroupType: '4VERTICAL',
-                nextGroupType: '4VERTICAL'
+                currentFallingGroupType: FourVert,
+                nextGroupType: FourVert
             }
             return initState;
         }
@@ -175,20 +173,23 @@ const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 ,transparen
      }
  }
  
+ 
+ const whatIsNextRotationState = (currentHeadFacing, rotationType, yRotationAsString) => {
+    let obj = {};
+    obj.Facing = 'FacingLeft';
+    obj.yRotation = 'YRotationOne'
+    return obj;
+}
+ 
 const RotateRightOnZAxis = (state) => {
     let newState = { ...state }
     console.log(newState.currentFallingGroupType, newState.headFacing, newState.yRotation)
-    if(newState.currentFallingGroupType === '4VERTICAL' && newState.headFacing === 'bottom' && newState.yRotation === 1){
-        newState = changeBlocksState(newState, FourVert.FacingLeft.YRotationOne)
-        if(newState.successOnRotate){
-            newState.headFacing = 'left'
-        }
-    }
-    else if(newState.currentFallingGroupType === '4VERTICAL' && newState.headFacing === 'right' && newState.yRotation === 1){
-        newState = changeBlocksState(newState, FourVert.FacingDown.YRotationOne)
-        if(newState.successOnRotate){
-            newState.headFacing = 'bottom'
-        }
+    let newRotationState = whatIsNextRotationState(newState.headFacing, 'right-on-z-axis', newState.yRotation)
+    let facing = newRotationState.Facing;
+    let y = newRotationState.yRotation
+    newState = changeBlocksState(newState, newState.currentFallingGroupType[facing][y])
+    if(newState.successOnRotate){
+        newState.headFacing = facing
     }
     return newState;
 }
@@ -347,8 +348,8 @@ const newBlockGroup = (state) => {
     box1.position.z = 2.5;
 
     switch(newState.nextGroupType){
-        case '4VERTICAL' : {
-            newState.currentFallingGroupType = '4VERTICAL';
+        case FourVert : {
+            newState.currentFallingGroupType = FourVert;
             box2.position.y = box1.position.y + 1;
             box2.position.x = box1.position.x;
             box2.position.z = box1.position.z;
@@ -375,7 +376,6 @@ const newBlockGroup = (state) => {
         }
     }
     
-
     return newState;
 }
 
