@@ -23,19 +23,19 @@ const rootReducer = (state, action) => {
         }
         case 'ROTATE_RIGHT_ON_Z_AXIS' : {
             const newState = Rotate(state, 'right-on-z-axis');
-            return { ...newState, lastAction: 'ROTATE_RIGHT_ON_Z_AXIS' }
+            return { ...newState, lastAction: 'ROTATE' }
         }
         case 'ROTATE_LEFT_ON_Z_AXIS' : {
             const newState = Rotate(state, 'left-on-z-axis');
-            return { ...newState, lastAction: 'ROTATE_LEFT_ON_Z_AXIS' }
+            return { ...newState, lastAction: 'ROTATE' }
         }
         case 'ROTATE_UP_ON_X_AXIS' : {
             const newState = Rotate(state, 'up-on-x-axis');
-            return { ...newState, lastAction: 'ROTATE_LEFT_ON_Z_AXIS' }
+            return { ...newState, lastAction: 'ROTATE' }
         }
         case 'ROTATE_DOWN_ON_X_AXIS' : {
             const newState = Rotate(state, 'down-on-x-axis');
-            return { ...newState, lastAction: 'ROTATE_LEFT_ON_Z_AXIS' }
+            return { ...newState, lastAction: 'ROTATE' }
         }
         case 'TRANSLATE_FALLING_GROUP' : {
             const newState = TranslateFallingGroup(state, action.direction)
@@ -664,6 +664,14 @@ class VizViewer extends Component {
         store.dispatch({type: 'ROTATE_LEFT_ON_Z_AXIS'})
     }
     
+    RotateUpOnXAxis(){
+        store.dispatch({type: 'ROTATE_UP_ON_X_AXIS'})
+    }
+    
+    RotateDownOnXAxis(){
+        store.dispatch({type: 'ROTATE_DOWN_ON_X_AXIS'})
+    }
+       
     
     AddBlock(){
         store.dispatch({type: 'ADD_BLOCK_GROUP'})
@@ -776,6 +784,8 @@ class VizViewer extends Component {
                 <Button color="primary" onClick={this.AddBlock}>button</Button>
                 <Button color="danger" onClick={this.RotateLeftOnZAxis}>Rotate Left on Z Axis</Button>
                 <Button color="accent" onClick={this.RotateRightOnZAxis}>Rotate Right On Z Axis</Button>
+                <Button color="danger" onClick={this.RotateUpOnXAxis}>Rotate up on x Axis</Button>
+                <Button color="accent" onClick={this.RotateDownOnXAxis}>Rotate down On x Axis</Button>
           </div>
         )
     }
