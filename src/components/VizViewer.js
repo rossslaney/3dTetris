@@ -22,11 +22,19 @@ const rootReducer = (state, action) => {
             return { ...newState, lastAction: 'ADD_BLOCK_GROUP' }
         }
         case 'ROTATE_RIGHT_ON_Z_AXIS' : {
-            const newState = RotateRightOnZAxis(state);
+            const newState = Rotate(state, 'right-on-z-axis');
             return { ...newState, lastAction: 'ROTATE_RIGHT_ON_Z_AXIS' }
         }
         case 'ROTATE_LEFT_ON_Z_AXIS' : {
-            const newState = RotateLeftOnZAxis(state);
+            const newState = Rotate(state, 'left-on-z-axis');
+            return { ...newState, lastAction: 'ROTATE_LEFT_ON_Z_AXIS' }
+        }
+        case 'ROTATE_UP_ON_X_AXIS' : {
+            const newState = Rotate(state, 'up-on-x-axis');
+            return { ...newState, lastAction: 'ROTATE_LEFT_ON_Z_AXIS' }
+        }
+        case 'ROTATE_DOWN_ON_X_AXIS' : {
+            const newState = Rotate(state, 'down-on-x-axis');
             return { ...newState, lastAction: 'ROTATE_LEFT_ON_Z_AXIS' }
         }
         case 'TRANSLATE_FALLING_GROUP' : {
@@ -258,37 +266,51 @@ const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 ,transparen
             }
             break
         }
+        case 'up-on-x-axis' : {
+            switch(currentHeadFacing){
+                case 'FacingDown' : {
+                    obj.Facing = 'FacingIn';
+                    obj.yRotation = 'YRotationOne'
+                    return obj
+                }
+                case 'FacingOut' : {
+                    obj.Facing = 'FacingDown';
+                    obj.yRotation = 'YRotationOne'
+                    return obj
+                }
+            }
+            break          
+        }
+        case 'down-on-x-axis' : {
+            switch(currentHeadFacing){
+                case 'FacingDown' : {
+                    obj.Facing = 'FacingOut';
+                    obj.yRotation = 'YRotationOne'
+                    return obj
+                }
+                case 'FacingIn' : {
+                    obj.Facing = 'FacingDown';
+                    obj.yRotation = 'YRotationOne'
+                    return obj
+                }
+            }
+            break          
+        }
     }
+}
+
+const Rotate = (state, directionString) => {
+    let newState = { ...state }
+    let newRotationState = whatIsNextRotationState(newState.headFacing, directionString, newState.yRotation)
+    if(newRotationState != undefined){
+        newState = changeBlocksState(newState, newState.currentFallingGroupType[newRotationState.Facing][newRotationState.yRotation])
+        if(newState.successOnRotate){
+            newState.headFacing = newRotationState.Facing;
+        }        
+    }
+    return newState;
 }
  
-const RotateRightOnZAxis = (state) => {
-    let newState = { ...state }
-    console.log(newState.currentFallingGroupType, newState.headFacing, newState.yRotation)
-    let newRotationState = whatIsNextRotationState(newState.headFacing, 'right-on-z-axis', newState.yRotation)
-    if(newRotationState != undefined){
-        newState = changeBlocksState(newState, newState.currentFallingGroupType[newRotationState.Facing][newRotationState.yRotation])
-        if(newState.successOnRotate){
-            newState.headFacing = newRotationState.Facing;
-        }        
-    }
-    return newState;
-}
-
-const RotateLeftOnZAxis = (state) => {
-    let newState = { ...state }
-    console.log(newState.currentFallingGroupType, newState.headFacing, newState.yRotation)
-    let newRotationState = whatIsNextRotationState(newState.headFacing, 'left-on-z-axis', newState.yRotation)
-    if(newRotationState != undefined){
-        console.log('falling group type: ')
-        console.log(newRotationState)
-        newState = changeBlocksState(newState, newState.currentFallingGroupType[newRotationState.Facing][newRotationState.yRotation])
-        if(newState.successOnRotate){
-            newState.headFacing = newRotationState.Facing;
-        }        
-    }
-    return newState;
-}
-
 //receives the current game state, and the proposed changed blocks state, and return finalState
 // POSITION OF BLOCK 1 NEVER CHANGES, all rotations are relative to block 1
 const changeBlocksState = (finalState, newBlocksState) => {
