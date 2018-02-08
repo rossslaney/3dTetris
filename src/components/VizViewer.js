@@ -146,8 +146,8 @@ const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 ,transparen
              }           
          }
      },
-     FacingRight : {
-        YRotationOne : {
+    FacingRight : {
+         YRotationOne : {
             //these store the positions of the block relative to the first block 
              block1: {
                  x: 0,
@@ -168,6 +168,56 @@ const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 ,transparen
                  x: 3,
                  y: 0,
                  z: 0
+             }           
+         }
+     },
+    FacingIn : {
+        YRotationOne : {
+            //these store the positions of the block relative to the first block 
+             block1: {
+                 x: 0,
+                 y: 0,
+                 z: 0
+             },
+             block2: {
+                 x: 0,
+                 y: 0,
+                 z: 1
+             },
+             block3: {
+                 x: 0,
+                 y: 0,
+                 z: 2
+             },
+             block4: {
+                 x: 0,
+                 y: 0,
+                 z: 3
+             }       
+        }
+     },
+    FacingOut : {
+        YRotationOne : {
+            //these store the positions of the block relative to the first block 
+             block1: {
+                 x: 0,
+                 y: 0,
+                 z: 0
+             },
+             block2: {
+                 x: 0,
+                 y: 0,
+                 z: -1
+             },
+             block3: {
+                 x: 0,
+                 y: 0,
+                 z: -2
+             },
+             block4: {
+                 x: 0,
+                 y: 0,
+                 z: -3
              }       
         }
      }
@@ -176,20 +226,50 @@ const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 ,transparen
  
  const whatIsNextRotationState = (currentHeadFacing, rotationType, yRotationAsString) => {
     let obj = {};
-    obj.Facing = 'FacingLeft';
-    obj.yRotation = 'YRotationOne'
-    return obj;
+    console.log(currentHeadFacing)
+    switch(rotationType){
+        case 'right-on-z-axis' : {
+            switch(currentHeadFacing){
+                case 'FacingDown' : {
+                    obj.Facing = 'FacingLeft';
+                    obj.yRotation = 'YRotationOne'
+                    return obj
+                }
+                case 'FacingRight' : {
+                    obj.Facing = 'FacingDown';
+                    obj.yRotation = 'YRotationOne'
+                    return obj
+                }
+            }
+            break;
+        }
+        case 'left-on-z-axis' : {
+            switch(currentHeadFacing){
+                case 'FacingDown' : {
+                    obj.Facing = 'FacingRight';
+                    obj.yRotation = 'YRotationOne'
+                    return obj
+                }
+                case 'FacingLeft' : {
+                    obj.Facing = 'FacingDown';
+                    obj.yRotation = 'YRotationOne'
+                    return obj
+                }
+            }
+            break
+        }
+    }
 }
  
 const RotateRightOnZAxis = (state) => {
     let newState = { ...state }
     console.log(newState.currentFallingGroupType, newState.headFacing, newState.yRotation)
     let newRotationState = whatIsNextRotationState(newState.headFacing, 'right-on-z-axis', newState.yRotation)
-    let facing = newRotationState.Facing;
-    let y = newRotationState.yRotation
-    newState = changeBlocksState(newState, newState.currentFallingGroupType[facing][y])
-    if(newState.successOnRotate){
-        newState.headFacing = facing
+    if(newRotationState != undefined){
+        newState = changeBlocksState(newState, newState.currentFallingGroupType[newRotationState.Facing][newRotationState.yRotation])
+        if(newState.successOnRotate){
+            newState.headFacing = newRotationState.Facing;
+        }        
     }
     return newState;
 }
@@ -197,29 +277,15 @@ const RotateRightOnZAxis = (state) => {
 const RotateLeftOnZAxis = (state) => {
     let newState = { ...state }
     console.log(newState.currentFallingGroupType, newState.headFacing, newState.yRotation)
-    switch(newState.currentFallingGroupType){
-        case '4VERTICAL' : {
-            switch(newState.headFacing){
-                case 'bottom' : {
-                    ///for 4Vertical we dont need a switch on yRotation, but other types will
-                    //switch(yRotation)
-                    newState = changeBlocksState(newState, FourVert.FacingRight.YRotationOne)
-                    if(newState.successOnRotate){
-                        newState.headFacing = 'right'
-                    }
-                    break;
-                }
-                case 'left' : {
-                    newState = changeBlocksState(newState, FourVert.FacingDown.YRotationOne)
-                    if(newState.successOnRotate){
-                        newState.headFacing = 'bottom'
-                    }
-                    break;
-                }
-            }
-        }
+    let newRotationState = whatIsNextRotationState(newState.headFacing, 'left-on-z-axis', newState.yRotation)
+    if(newRotationState != undefined){
+        console.log('falling group type: ')
+        console.log(newRotationState)
+        newState = changeBlocksState(newState, newState.currentFallingGroupType[newRotationState.Facing][newRotationState.yRotation])
+        if(newState.successOnRotate){
+            newState.headFacing = newRotationState.Facing;
+        }        
     }
-    
     return newState;
 }
 
@@ -334,9 +400,8 @@ const newBlockGroup = (state) => {
     
     //data for rotating group 
     box1.userData.head = true;
-    box1.userData.headFacing = 'bottom'
 
-    newState.headFacing = 'bottom';
+    newState.headFacing = 'FacingDown';
     newState.yRotation = 1;
     
     box2.userData.status = 'falling';
