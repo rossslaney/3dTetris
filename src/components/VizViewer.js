@@ -52,8 +52,7 @@ const rootReducer = (state, action) => {
                 camera,
                 lastAction: '',
                 blocks: [],
-                currentFallingGroupType: FourVert,
-                nextGroupType: FourVert
+                nextGroupType: BigSquare
             }
             return initState;
         }
@@ -80,6 +79,8 @@ const render3js = () => {
 
 //define colors
 const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 ,transparent: true, opacity: 0.5});
+const materialBlue = new THREE.MeshBasicMaterial({ color: 0x0900ff ,transparent: true, opacity: 0.5});
+const materialGreen = new THREE.MeshBasicMaterial({ color: 0x00FF09 ,transparent: true, opacity: 0.5});
 
 //...
 
@@ -103,8 +104,9 @@ const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 ,transparen
  * 
  * **************************************/
  
- const FourVert = {
-     FacingDown : {
+const FourVert = {
+    material: materialOrange,
+    FacingDown : {
          YRotationOne : {
             //these store the positions of the block relative to the first block 
              block1: {
@@ -129,7 +131,136 @@ const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 ,transparen
              }      
          }
      },
-     FacingLeft : {
+    FacingLeft : {
+         YRotationOne : {
+            //these store the positions of the block relative to the first block 
+             block1: {
+                 x: 0,
+                 y: 0,
+                 z: 0
+             },
+             block2: {
+                 x: -1,
+                 y: 0,
+                 z: 0
+             },
+             block3: {
+                 x: -2,
+                 y: 0,
+                 z: 0
+             },
+             block4: {
+                 x: -3,
+                 y: 0,
+                 z: 0
+             }           
+         }
+     },
+    FacingRight : {
+         YRotationOne : {
+            //these store the positions of the block relative to the first block 
+             block1: {
+                 x: 0,
+                 y: 0,
+                 z: 0
+             },
+             block2: {
+                 x: 1,
+                 y: 0,
+                 z: 0
+             },
+             block3: {
+                 x: 2,
+                 y: 0,
+                 z: 0
+             },
+             block4: {
+                 x: 3,
+                 y: 0,
+                 z: 0
+             }           
+         }
+     },
+    FacingIn : {
+        YRotationOne : {
+            //these store the positions of the block relative to the first block 
+             block1: {
+                 x: 0,
+                 y: 0,
+                 z: 0
+             },
+             block2: {
+                 x: 0,
+                 y: 0,
+                 z: 1
+             },
+             block3: {
+                 x: 0,
+                 y: 0,
+                 z: 2
+             },
+             block4: {
+                 x: 0,
+                 y: 0,
+                 z: 3
+             }       
+        }
+     },
+    FacingOut : {
+        YRotationOne : {
+            //these store the positions of the block relative to the first block 
+             block1: {
+                 x: 0,
+                 y: 0,
+                 z: 0
+             },
+             block2: {
+                 x: 0,
+                 y: 0,
+                 z: -1
+             },
+             block3: {
+                 x: 0,
+                 y: 0,
+                 z: -2
+             },
+             block4: {
+                 x: 0,
+                 y: 0,
+                 z: -3
+             }       
+        }
+     }
+ }
+ 
+const LForward = {
+    material: materialOrange,
+    FacingDown : {
+         YRotationOne : {
+            //these store the positions of the block relative to the first block 
+             block1: {
+                 x: 0,
+                 y: 0,
+                 z: 0
+             },
+             block2: {
+                 x: 0,
+                 y: 1,
+                 z: 0
+             },
+             block3: {
+                 x: 0,
+                 y: 2,
+                 z: 0
+             },
+             block4: {
+                 x: 0,
+                 y: 3,
+                 z: 0
+             }      
+         }
+     },
+    FacingLeft : {
          YRotationOne : {
             //these store the positions of the block relative to the first block 
              block1: {
@@ -232,9 +363,137 @@ const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 ,transparen
  }
  
  
+const BigSquare = {
+    material: materialBlue,
+    FacingDown : {
+         YRotationOne : {
+            //these store the positions of the block relative to the first block 
+             block1: {
+                 x: 0,
+                 y: 0,
+                 z: 0
+             },
+             block2: {
+                 x: -1,
+                 y: 0,
+                 z: 0
+             },
+             block3: {
+                 x: -1,
+                 y: 0,
+                 z: 1
+             },
+             block4: {
+                 x: 0,
+                 y: 0,
+                 z: 1
+             }      
+         }
+     },
+    FacingLeft : {
+         YRotationOne : {
+            //these store the positions of the block relative to the first block 
+             block1: {
+                 x: 0,
+                 y: 0,
+                 z: 0
+             },
+             block2: {
+                 x: 0,
+                 y: 1,
+                 z: 0
+             },
+             block3: {
+                 x: 0,
+                 y: 0,
+                 z: 1
+             },
+             block4: {
+                 x: 0,
+                 y: 1,
+                 z: 1
+             }             
+         }
+     },
+    FacingRight : {
+         YRotationOne : {
+            //these store the positions of the block relative to the first block 
+             block1: {
+                 x: 0,
+                 y: 0,
+                 z: 0
+             },
+             block2: {
+                 x: 0,
+                 y: 1,
+                 z: 0
+             },
+             block3: {
+                 x: 0,
+                 y: 0,
+                 z: 1
+             },
+             block4: {
+                 x: 0,
+                 y: 1,
+                 z: 1
+             }             
+         }
+     },
+    FacingIn : {
+        YRotationOne : {
+            //these store the positions of the block relative to the first block 
+             block1: {
+                 x: 0,
+                 y: 0,
+                 z: 0
+             },
+             block2: {
+                 x: 0,
+                 y: 1,
+                 z: 0
+             },
+             block3: {
+                 x: -1,
+                 y: 1,
+                 z: 0
+             },
+             block4: {
+                 x: -1,
+                 y: 0,
+                 z: 0
+             }      
+        }
+     },
+    FacingOut : {
+        YRotationOne : {
+            //these store the positions of the block relative to the first block 
+             block1: {
+                 x: 0,
+                 y: 0,
+                 z: 0
+             },
+             block2: {
+                 x: 0,
+                 y: 1,
+                 z: 0
+             },
+             block3: {
+                 x: -1,
+                 y: 1,
+                 z: 0
+             },
+             block4: {
+                 x: -1,
+                 y: 0,
+                 z: 0
+             }      
+        }
+    }
+}
+ 
  const whatIsNextRotationState = (currentHeadFacing, rotationType, yRotationAsString) => {
     let obj = {};
-    console.log(currentHeadFacing)
     switch(rotationType){
         case 'right-on-z-axis' : {
             switch(currentHeadFacing){
@@ -409,14 +668,15 @@ const checkCompletedRows = (state) => {
 }
 
 const newBlockGroup = (state) => {
-    const newState = { ...state }
+    let newState = { ...state }
+    newState.currentFallingGroupType = newState.nextGroupType;
     newState.currentBlockGroup = []
     //every group has four blocks and starting position
     const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const box1 = new THREE.Mesh(geometry, materialOrange);
-    const box2 = new THREE.Mesh(geometry, materialOrange);
-    const box3 = new THREE.Mesh(geometry, materialOrange);
-    const box4 = new THREE.Mesh(geometry, materialOrange);
+    const box1 = new THREE.Mesh(geometry, newState.currentFallingGroupType.material);
+    const box2 = new THREE.Mesh(geometry, newState.currentFallingGroupType.material);
+    const box3 = new THREE.Mesh(geometry, newState.currentFallingGroupType.material);
+    const box4 = new THREE.Mesh(geometry, newState.currentFallingGroupType.material);
     
     box1.userData.status = 'falling'; //box status property is used to denote its state of 'falling' or 'resting'
     
@@ -431,40 +691,39 @@ const newBlockGroup = (state) => {
     box4.userData.status = 'falling';
     
     box1.position.y = 20 ;
-    box1.position.x = 2.5;
-    box1.position.z = 2.5;
+    box1.position.x = 0.5;
+    box1.position.z = 0.5;
 
-    switch(newState.nextGroupType){
-        case FourVert : {
-            newState.currentFallingGroupType = FourVert;
-            box2.position.y = box1.position.y + 1;
-            box2.position.x = box1.position.x;
-            box2.position.z = box1.position.z;
+    box2.position.x = box1.position.x + newState.currentFallingGroupType.FacingDown.YRotationOne.block2.x
+    box2.position.y = box1.position.y + newState.currentFallingGroupType.FacingDown.YRotationOne.block2.y
+    box2.position.z = box1.position.z + newState.currentFallingGroupType.FacingDown.YRotationOne.block2.z
             
-            box3.position.y = box2.position.y + 1;
-            box3.position.x = box1.position.x;
-            box3.position.z = box1.position.z;
+    box3.position.x = box1.position.x + newState.currentFallingGroupType.FacingDown.YRotationOne.block3.x
+    box3.position.y = box1.position.y + newState.currentFallingGroupType.FacingDown.YRotationOne.block3.y
+    box3.position.z = box1.position.z + newState.currentFallingGroupType.FacingDown.YRotationOne.block3.z
+            
+    box4.position.x = box1.position.x + newState.currentFallingGroupType.FacingDown.YRotationOne.block4.x
+    box4.position.y = box1.position.y + newState.currentFallingGroupType.FacingDown.YRotationOne.block4.y
+    box4.position.z = box1.position.z + newState.currentFallingGroupType.FacingDown.YRotationOne.block4.z
+            
            
-            box4.position.y = box3.position.y + 1;
-            box4.position.x = box1.position.x;
-            box4.position.z = box1.position.z;
-            newState.scene.add(box1);
-            newState.blocks.push(box1);
-            newState.scene.add(box2);
-            newState.blocks.push(box2);
-            newState.scene.add(box3);
-            newState.blocks.push(box3);
-            newState.scene.add(box4);
-            newState.blocks.push(box4);
-            newState.currentBlockGroup.push(box1)
-            newState.currentBlockGroup.push(box2)
-            newState.currentBlockGroup.push(box3)
-            newState.currentBlockGroup.push(box4)
-        }
-    }
+            
+    newState.scene.add(box1);
+    newState.blocks.push(box1);
+    newState.scene.add(box2);
+    newState.blocks.push(box2);
+    newState.scene.add(box3);
+    newState.blocks.push(box3);
+    newState.scene.add(box4);
+    newState.blocks.push(box4);
+    newState.currentBlockGroup.push(box1)
+    newState.currentBlockGroup.push(box2)
+    newState.currentBlockGroup.push(box3)
+    newState.currentBlockGroup.push(box4)
     
     return newState;
 }
+
 
 const TranslateFallingGroup = (state, direction) => {
     const newState = { ...state }
