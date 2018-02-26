@@ -60,7 +60,7 @@ const rootReducer = (state, action) => {
                 camera,
                 lastAction: '',
                 blocks: [],
-                nextGroupType: LForward
+                nextGroupType: FourVert
             }
             return initState;
         }
@@ -479,71 +479,6 @@ const BigSquare = {
     }
 }
  
-const whatIsNextRotationState = (currentHeadFacing, rotationType, yRotationAsString) => {
-    let obj = {};
-    switch(rotationType){
-        case 'right-on-z-axis' : {
-            switch(currentHeadFacing){
-                case 'FacingDown' : {
-                    obj.Facing = 'FacingLeft';
-                    obj.yRotation = 'YRotationOne'
-                    return obj
-                }
-                case 'FacingRight' : {
-                    obj.Facing = 'FacingDown';
-                    obj.yRotation = 'YRotationOne'
-                    return obj
-                }
-            }
-            break;
-        }
-        case 'left-on-z-axis' : {
-            switch(currentHeadFacing){
-                case 'FacingDown' : {
-                    obj.Facing = 'FacingRight';
-                    obj.yRotation = 'YRotationOne'
-                    return obj
-                }
-                case 'FacingLeft' : {
-                    obj.Facing = 'FacingDown';
-                    obj.yRotation = 'YRotationOne'
-                    return obj
-                }
-            }
-            break
-        }
-        case 'up-on-x-axis' : {
-            switch(currentHeadFacing){
-                case 'FacingDown' : {
-                    obj.Facing = 'FacingIn';
-                    obj.yRotation = 'YRotationOne'
-                    return obj
-                }
-                case 'FacingOut' : {
-                    obj.Facing = 'FacingDown';
-                    obj.yRotation = 'YRotationOne'
-                    return obj
-                }
-            }
-            break          
-        }
-        case 'down-on-x-axis' : {
-            switch(currentHeadFacing){
-                case 'FacingDown' : {
-                    obj.Facing = 'FacingOut';
-                    obj.yRotation = 'YRotationOne'
-                    return obj
-                }
-                case 'FacingIn' : {
-                    obj.Facing = 'FacingDown';
-                    obj.yRotation = 'YRotationOne'
-                    return obj
-                }
-            }
-            break          
-        }
-    }
-}
 
 
 
@@ -565,9 +500,6 @@ function rotateHelper(cx, cy, x, y, angle) {
 }
 
 
-
-
-
 const Rotate = (state, directionString) => {
     let newState = { ...state }
     
@@ -575,6 +507,7 @@ const Rotate = (state, directionString) => {
     let testX;
     let testY;
     let testZ;
+    let testBlocks = [];
     let restingBlocks = []; //get all resting blocks with for loop
     
     switch(directionString){
@@ -582,8 +515,11 @@ const Rotate = (state, directionString) => {
             for(let i = 0; i<newState.currentBlockGroup.length; i++){
                 let block = newState.currentBlockGroup[i];
                 let retArray = rotateHelper(newState.currentBlockGroup[0].position.x, newState.currentBlockGroup[0].position.y, block.position.x, block.position.y, -90);
-                block.position.x = retArray[0];
-                block.position.y = retArray[1];
+                let obj = {};
+                obj.x = retArray[0];
+                obj.y = retArray[1];
+                obj.z = block.position.z;
+                testBlocks.push(obj);
             }
             break;
         }
@@ -591,8 +527,11 @@ const Rotate = (state, directionString) => {
             for(let i = 0; i<newState.currentBlockGroup.length; i++){
                 let block = newState.currentBlockGroup[i];
                 let retArray = rotateHelper(newState.currentBlockGroup[0].position.x, newState.currentBlockGroup[0].position.y, block.position.x, block.position.y, 90);
-                block.position.x = retArray[0];
-                block.position.y = retArray[1];
+                let obj = {};
+                obj.x = retArray[0];
+                obj.y = retArray[1];
+                obj.z = block.position.z;
+                testBlocks.push(obj);
             }
             break;
         }
@@ -602,6 +541,11 @@ const Rotate = (state, directionString) => {
                 let retArray = rotateHelper(newState.currentBlockGroup[0].position.y, newState.currentBlockGroup[0].position.z, block.position.y, block.position.z, -90);
                 block.position.y = retArray[0];
                 block.position.z = retArray[1];
+                let obj = {};
+                obj.y = retArray[0];
+                obj.z = retArray[1];
+                obj.x = block.position.x;
+                testBlocks.push(obj);
             }
             break;
         }
@@ -609,8 +553,11 @@ const Rotate = (state, directionString) => {
             for(let i = 0; i<newState.currentBlockGroup.length; i++){
                 let block = newState.currentBlockGroup[i];
                 let retArray = rotateHelper(newState.currentBlockGroup[0].position.y, newState.currentBlockGroup[0].position.z, block.position.y, block.position.z, -90);
-                block.position.y = retArray[0];
-                block.position.z = retArray[1];
+                let obj = {};
+                obj.y = retArray[0];
+                obj.z = retArray[1];
+                obj.x = block.position.x;
+                testBlocks.push(obj);
             }
             break;
         }
@@ -620,6 +567,11 @@ const Rotate = (state, directionString) => {
                 let retArray = rotateHelper(newState.currentBlockGroup[0].position.z, newState.currentBlockGroup[0].position.x, block.position.z, block.position.x, -90);
                 block.position.z = retArray[0];
                 block.position.x = retArray[1];
+                let obj = {};
+                obj.z = retArray[0];
+                obj.x = retArray[1];
+                obj.y = block.position.y;
+                testBlocks.push(obj);
             }
             break;
         }
@@ -627,23 +579,49 @@ const Rotate = (state, directionString) => {
             for(let i = 0; i<newState.currentBlockGroup.length; i++){
                 let block = newState.currentBlockGroup[i];
                 let retArray = rotateHelper(newState.currentBlockGroup[0].position.z, newState.currentBlockGroup[0].position.x, block.position.z, block.position.x, 90);
-                block.position.z = retArray[0];
-                block.position.x = retArray[1];
+                let obj = {};
+                obj.z = retArray[0];
+                obj.x = retArray[1];
+                obj.y = block.position.y;
+                testBlocks.push(obj);
             }
             break;
         }
     }
-
-    
-    //make rotation and place in test locations
-    
-    //test new locations against out of bounds
-    
+    //test the test locations against out of bounds
+    for(let i = 0; i<testBlocks.length; i++){
+        testX = testBlocks[i].x;
+        testY = testBlocks[i].y;
+        testZ = testBlocks[i].z;
+        if(testX > 2.5 || testX < -2.5 || testZ > 2.5 || testZ < -2.5 || testY < 0.5){
+            validMove = false; 
+        } 
+    }
     //test new locations against resting blocks
+    for(let i = 0; i<newState.blocks.length; i++){
+        if(newState.blocks[i].userData.status != 'falling'){
+            //restingBlocks.push(newState.blocks[i])
+            for(let p = 0; i<testBlocks.length; i++){
+                 if(testBlocks[p].x == newState.blocks[i].position.x && Math.abs(testBlocks[p].y - newState.blocks[i].position.y) < 1 && testBlocks[p].z == newState.blocks[i].position.z){
+                    validMove = false; 
+                    break;
+                }               
+            }
+        }
+    }
     
-    //place blocks in new locations
+    //place blocks in new locations if valid move
+    console.log(validMove)
     if(validMove){
-
+        for(let i = 0; i<testBlocks.length; i++){
+            console.log(i)
+            console.log(testBlocks[i].x)
+            console.log(testBlocks[i].y)
+            console.log(testBlocks[i].z)
+            newState.currentBlockGroup[i].position.x = testBlocks[i].x;
+            newState.currentBlockGroup[i].position.y = testBlocks[i].y;
+            newState.currentBlockGroup[i].position.z = testBlocks[i].z;
+        }
     }
     else{
         newState.successOnRotate = false;
@@ -662,25 +640,6 @@ const Rotate = (state, directionString) => {
     */
     return newState;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
