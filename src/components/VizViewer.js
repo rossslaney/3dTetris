@@ -37,6 +37,14 @@ const rootReducer = (state, action) => {
             const newState = Rotate(state, 'down-on-x-axis');
             return { ...newState, lastAction: 'ROTATE' }
         }
+        case 'ROTATE_UP_ON_Y_AXIS' : {
+            const newState = Rotate(state, 'up-on-y-axis');
+            return { ...newState, lastAction: 'ROTATE' }
+        }
+        case 'ROTATE_DOWN_ON_Y_AXIS' : {
+            const newState = Rotate(state, 'down-on-y-axis');
+            return { ...newState, lastAction: 'ROTATE' }
+        }
         case 'TRANSLATE_FALLING_GROUP' : {
             const newState = TranslateFallingGroup(state, action.direction)
             return { ...newState, lastAction: 'MOVE_FALLING_GROUP' }
@@ -52,7 +60,7 @@ const rootReducer = (state, action) => {
                 camera,
                 lastAction: '',
                 blocks: [],
-                nextGroupType: BigSquare
+                nextGroupType: LForward
             }
             return initState;
         }
@@ -81,29 +89,8 @@ const render3js = () => {
 const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 ,transparent: true, opacity: 0.5});
 const materialBlue = new THREE.MeshBasicMaterial({ color: 0x0900ff ,transparent: true, opacity: 0.5});
 const materialGreen = new THREE.MeshBasicMaterial({ color: 0x00FF09 ,transparent: true, opacity: 0.5});
-
 //...
 
-
-/*****************************************
- * 
- *    Allow 90 degree rotation on z a & x axis in both directions
- *    
- *    There is the standard set state where the block is facing down
- *     
- *    Then there is the facing right & left from z-axis rotations
- *    and out & in from x-axis rotation
- *        
- *    
- *      I think hard-coding in these states (as the blocks relate to the 'head' block) will save time
- * 
- *  After, I will add the four y-axis rotation states to each block group 
- * 
- * 
- *  Y Values will start from the way it drops then increment by one for each 90 degree turn to the right (facing initial forward direction)
- * 
- * **************************************/
- 
 const FourVert = {
     material: materialOrange,
     FacingDown : {
@@ -244,18 +231,18 @@ const LForward = {
                  z: 0
              },
              block2: {
-                 x: 0,
-                 y: 1,
+                 x: -1,
+                 y: 0,
                  z: 0
              },
              block3: {
                  x: 0,
-                 y: 2,
+                 y: 1,
                  z: 0
              },
              block4: {
                  x: 0,
-                 y: 3,
+                 y: 2,
                  z: 0
              }      
          }
@@ -492,7 +479,7 @@ const BigSquare = {
     }
 }
  
- const whatIsNextRotationState = (currentHeadFacing, rotationType, yRotationAsString) => {
+const whatIsNextRotationState = (currentHeadFacing, rotationType, yRotationAsString) => {
     let obj = {};
     switch(rotationType){
         case 'right-on-z-axis' : {
@@ -558,8 +545,113 @@ const BigSquare = {
     }
 }
 
+
+
+
+
+
+
+//send x,y locations for z axis
+//y,z locations for x axis
+//z,x for y axis
+//first two variables are point to rotate around
+function rotateHelper(cx, cy, x, y, angle) {
+    var radians = (Math.PI / 180) * angle,
+        cos = Math.cos(radians),
+        sin = Math.sin(radians),
+        nx = (cos * (x - cx)) + (sin * (y - cy)) + cx,
+        ny = (cos * (y - cy)) - (sin * (x - cx)) + cy;
+    return [nx, ny];
+}
+
+
+
+
+
 const Rotate = (state, directionString) => {
     let newState = { ...state }
+    
+    let validMove = true;
+    let testX;
+    let testY;
+    let testZ;
+    let restingBlocks = []; //get all resting blocks with for loop
+    
+    switch(directionString){
+        case 'right-on-z-axis' : {
+            for(let i = 0; i<newState.currentBlockGroup.length; i++){
+                let block = newState.currentBlockGroup[i];
+                let retArray = rotateHelper(newState.currentBlockGroup[0].position.x, newState.currentBlockGroup[0].position.y, block.position.x, block.position.y, -90);
+                block.position.x = retArray[0];
+                block.position.y = retArray[1];
+            }
+            break;
+        }
+        case 'left-on-z-axis' : {
+            for(let i = 0; i<newState.currentBlockGroup.length; i++){
+                let block = newState.currentBlockGroup[i];
+                let retArray = rotateHelper(newState.currentBlockGroup[0].position.x, newState.currentBlockGroup[0].position.y, block.position.x, block.position.y, 90);
+                block.position.x = retArray[0];
+                block.position.y = retArray[1];
+            }
+            break;
+        }
+        case 'up-on-x-axis' : {
+            for(let i = 0; i<newState.currentBlockGroup.length; i++){
+                let block = newState.currentBlockGroup[i];
+                let retArray = rotateHelper(newState.currentBlockGroup[0].position.y, newState.currentBlockGroup[0].position.z, block.position.y, block.position.z, -90);
+                block.position.y = retArray[0];
+                block.position.z = retArray[1];
+            }
+            break;
+        }
+        case 'down-on-x-axis' : {
+            for(let i = 0; i<newState.currentBlockGroup.length; i++){
+                let block = newState.currentBlockGroup[i];
+                let retArray = rotateHelper(newState.currentBlockGroup[0].position.y, newState.currentBlockGroup[0].position.z, block.position.y, block.position.z, -90);
+                block.position.y = retArray[0];
+                block.position.z = retArray[1];
+            }
+            break;
+        }
+        case 'up-on-y-axis' : {
+            for(let i = 0; i<newState.currentBlockGroup.length; i++){
+                let block = newState.currentBlockGroup[i];
+                let retArray = rotateHelper(newState.currentBlockGroup[0].position.z, newState.currentBlockGroup[0].position.x, block.position.z, block.position.x, -90);
+                block.position.z = retArray[0];
+                block.position.x = retArray[1];
+            }
+            break;
+        }
+        case 'down-on-y-axis' : {
+            for(let i = 0; i<newState.currentBlockGroup.length; i++){
+                let block = newState.currentBlockGroup[i];
+                let retArray = rotateHelper(newState.currentBlockGroup[0].position.z, newState.currentBlockGroup[0].position.x, block.position.z, block.position.x, 90);
+                block.position.z = retArray[0];
+                block.position.x = retArray[1];
+            }
+            break;
+        }
+    }
+
+    
+    //make rotation and place in test locations
+    
+    //test new locations against out of bounds
+    
+    //test new locations against resting blocks
+    
+    //place blocks in new locations
+    if(validMove){
+
+    }
+    else{
+        newState.successOnRotate = false;
+    }   
+    
+    
+    
+    /* OLD hardcoded way of rotating blocks
     let newRotationState = whatIsNextRotationState(newState.headFacing, directionString, newState.yRotation)
     if(newRotationState != undefined){
         newState = changeBlocksState(newState, newState.currentFallingGroupType[newRotationState.Facing][newRotationState.yRotation])
@@ -567,9 +659,33 @@ const Rotate = (state, directionString) => {
             newState.headFacing = newRotationState.Facing;
         }        
     }
+    */
     return newState;
 }
- 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //receives the current game state, and the proposed changed blocks state, and return finalState
 // POSITION OF BLOCK 1 NEVER CHANGES, all rotations are relative to block 1
 const changeBlocksState = (finalState, newBlocksState) => {
@@ -905,16 +1021,18 @@ class VizViewer extends Component {
     constructor(props){
         super(props);
         this.AddBlock = this.AddBlock.bind(this)
-        this.RotateYAxis = this.RotateYAxis.bind(this)
         this.RotateRightOnZAxis = this.RotateRightOnZAxis.bind(this)
         this.RotateLeftOnZAxis = this.RotateLeftOnZAxis.bind(this)
         this.state = {};
     }
     
-    RotateYAxis(){
-        store.dispatch({type: 'ROTATE_Y_AXIS'})
+    RotateUpOnYAxis(){
+        store.dispatch({type: 'ROTATE_UP_ON_Y_AXIS'})
     }
-    
+    RotateDownOnYAxis(){
+        store.dispatch({type: 'ROTATE_DOWN_ON_Y_AXIS'})
+    }
+     
     RotateRightOnZAxis(){
         store.dispatch({type: 'ROTATE_RIGHT_ON_Z_AXIS'})
     }
@@ -1045,6 +1163,8 @@ class VizViewer extends Component {
                 <Button color="accent" onClick={this.RotateRightOnZAxis}>Rotate Right On Z Axis</Button>
                 <Button color="danger" onClick={this.RotateUpOnXAxis}>Rotate up on x Axis</Button>
                 <Button color="accent" onClick={this.RotateDownOnXAxis}>Rotate down On x Axis</Button>
+                <Button color="danger" onClick={this.RotateUpOnYAxis}>Rotate up on y Axis</Button>
+                <Button color="accent" onClick={this.RotateDownOnYAxis}>Rotate down On y Axis</Button>
           </div>
         )
     }
