@@ -611,13 +611,8 @@ const Rotate = (state, directionString) => {
     }
     
     //place blocks in new locations if valid move
-    console.log(validMove)
     if(validMove){
         for(let i = 0; i<testBlocks.length; i++){
-            console.log(i)
-            console.log(testBlocks[i].x)
-            console.log(testBlocks[i].y)
-            console.log(testBlocks[i].z)
             newState.currentBlockGroup[i].position.x = testBlocks[i].x;
             newState.currentBlockGroup[i].position.y = testBlocks[i].y;
             newState.currentBlockGroup[i].position.z = testBlocks[i].z;
