@@ -60,7 +60,7 @@ const rootReducer = (state, action) => {
                 camera,
                 lastAction: '',
                 blocks: [],
-                nextGroupType: FourVert
+                nextGroupType: ZShape
             }
             return initState;
         }
@@ -84,6 +84,8 @@ const render3js = () => {
 
 
 
+//game height variable
+let GAME_HEIGHT = 20;
 
 //define colors
 const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 ,transparent: true, opacity: 0.5});
@@ -93,398 +95,59 @@ const materialGreen = new THREE.MeshBasicMaterial({ color: 0x00FF09 ,transparent
 
 const FourVert = {
     material: materialOrange,
-    FacingDown : {
-         YRotationOne : {
-            //these store the positions of the block relative to the first block 
-             block1: {
-                 x: 0,
-                 y: 0,
-                 z: 0
-             },
-             block2: {
-                 x: 0,
-                 y: 1,
-                 z: 0
-             },
-             block3: {
-                 x: 0,
-                 y: 2,
-                 z: 0
-             },
-             block4: {
-                 x: 0,
-                 y: 3,
-                 z: 0
-             }      
-         }
-     },
-    FacingLeft : {
-         YRotationOne : {
-            //these store the positions of the block relative to the first block 
-             block1: {
-                 x: 0,
-                 y: 0,
-                 z: 0
-             },
-             block2: {
-                 x: -1,
-                 y: 0,
-                 z: 0
-             },
-             block3: {
-                 x: -2,
-                 y: 0,
-                 z: 0
-             },
-             block4: {
-                 x: -3,
-                 y: 0,
-                 z: 0
-             }           
-         }
-     },
-    FacingRight : {
-         YRotationOne : {
-            //these store the positions of the block relative to the first block 
-             block1: {
-                 x: 0,
-                 y: 0,
-                 z: 0
-             },
-             block2: {
-                 x: 1,
-                 y: 0,
-                 z: 0
-             },
-             block3: {
-                 x: 2,
-                 y: 0,
-                 z: 0
-             },
-             block4: {
-                 x: 3,
-                 y: 0,
-                 z: 0
-             }           
-         }
-     },
-    FacingIn : {
-        YRotationOne : {
-            //these store the positions of the block relative to the first block 
-             block1: {
-                 x: 0,
-                 y: 0,
-                 z: 0
-             },
-             block2: {
-                 x: 0,
-                 y: 0,
-                 z: 1
-             },
-             block3: {
-                 x: 0,
-                 y: 0,
-                 z: 2
-             },
-             block4: {
-                 x: 0,
-                 y: 0,
-                 z: 3
-             }       
-        }
-     },
-    FacingOut : {
-        YRotationOne : {
-            //these store the positions of the block relative to the first block 
-             block1: {
-                 x: 0,
-                 y: 0,
-                 z: 0
-             },
-             block2: {
-                 x: 0,
-                 y: 0,
-                 z: -1
-             },
-             block3: {
-                 x: 0,
-                 y: 0,
-                 z: -2
-             },
-             block4: {
-                 x: 0,
-                 y: 0,
-                 z: -3
-             }       
-        }
-     }
+    blocks: [
+        {x: 0, y: 0, z: 0},
+        {x: 0, y: 1, z: 0},
+        {x: 0, y: 2, z: 0},
+        {x: 0, y: 3, z: 0}
+    ]
  }
  
-const LForward = {
+ const TShape = {
     material: materialOrange,
-    FacingDown : {
-         YRotationOne : {
-            //these store the positions of the block relative to the first block 
-             block1: {
-                 x: 0,
-                 y: 0,
-                 z: 0
-             },
-             block2: {
-                 x: -1,
-                 y: 0,
-                 z: 0
-             },
-             block3: {
-                 x: 0,
-                 y: 1,
-                 z: 0
-             },
-             block4: {
-                 x: 0,
-                 y: 2,
-                 z: 0
-             }      
-         }
-     },
-    FacingLeft : {
-         YRotationOne : {
-            //these store the positions of the block relative to the first block 
-             block1: {
-                 x: 0,
-                 y: 0,
-                 z: 0
-             },
-             block2: {
-                 x: -1,
-                 y: 0,
-                 z: 0
-             },
-             block3: {
-                 x: -2,
-                 y: 0,
-                 z: 0
-             },
-             block4: {
-                 x: -3,
-                 y: 0,
-                 z: 0
-             }           
-         }
-     },
-    FacingRight : {
-         YRotationOne : {
-            //these store the positions of the block relative to the first block 
-             block1: {
-                 x: 0,
-                 y: 0,
-                 z: 0
-             },
-             block2: {
-                 x: 1,
-                 y: 0,
-                 z: 0
-             },
-             block3: {
-                 x: 2,
-                 y: 0,
-                 z: 0
-             },
-             block4: {
-                 x: 3,
-                 y: 0,
-                 z: 0
-             }           
-         }
-     },
-    FacingIn : {
-        YRotationOne : {
-            //these store the positions of the block relative to the first block 
-             block1: {
-                 x: 0,
-                 y: 0,
-                 z: 0
-             },
-             block2: {
-                 x: 0,
-                 y: 0,
-                 z: 1
-             },
-             block3: {
-                 x: 0,
-                 y: 0,
-                 z: 2
-             },
-             block4: {
-                 x: 0,
-                 y: 0,
-                 z: 3
-             }       
-        }
-     },
-    FacingOut : {
-        YRotationOne : {
-            //these store the positions of the block relative to the first block 
-             block1: {
-                 x: 0,
-                 y: 0,
-                 z: 0
-             },
-             block2: {
-                 x: 0,
-                 y: 0,
-                 z: -1
-             },
-             block3: {
-                 x: 0,
-                 y: 0,
-                 z: -2
-             },
-             block4: {
-                 x: 0,
-                 y: 0,
-                 z: -3
-             }       
-        }
-     }
+    blocks: [
+        {x: 0, y: 0, z: 0},
+        {x: 0, y: 1, z: 0},
+        {x: 0, y: 2, z: 0},
+        {x: 1, y: 1, z: 0}
+    ]
+ }
+ 
+ const ZShape = {
+    material: materialOrange,
+    blocks: [
+        {x: 0, y: 0, z: 0},
+        {x: 1, y: 0, z: 0},
+        {x: 1, y: 1, z: 0},
+        {x: 2, y: 1, z: 0}
+    ]
+ }
+ 
+const LShape = {
+    material: materialOrange,
+    blocks: [
+        {x: 0, y: 0, z: 0},
+        {x: 0, y: 1, z: 0},
+        {x: 0, y: 2, z: 0},
+        {x: 1, y: 0, z: 0}
+    ]
  }
  
  
 const BigSquare = {
-    material: materialBlue,
-    FacingDown : {
-         YRotationOne : {
-            //these store the positions of the block relative to the first block 
-             block1: {
-                 x: 0,
-                 y: 0,
-                 z: 0
-             },
-             block2: {
-                 x: -1,
-                 y: 0,
-                 z: 0
-             },
-             block3: {
-                 x: -1,
-                 y: 0,
-                 z: 1
-             },
-             block4: {
-                 x: 0,
-                 y: 0,
-                 z: 1
-             }      
-         }
-     },
-    FacingLeft : {
-         YRotationOne : {
-            //these store the positions of the block relative to the first block 
-             block1: {
-                 x: 0,
-                 y: 0,
-                 z: 0
-             },
-             block2: {
-                 x: 0,
-                 y: 1,
-                 z: 0
-             },
-             block3: {
-                 x: 0,
-                 y: 0,
-                 z: 1
-             },
-             block4: {
-                 x: 0,
-                 y: 1,
-                 z: 1
-             }             
-         }
-     },
-    FacingRight : {
-         YRotationOne : {
-            //these store the positions of the block relative to the first block 
-             block1: {
-                 x: 0,
-                 y: 0,
-                 z: 0
-             },
-             block2: {
-                 x: 0,
-                 y: 1,
-                 z: 0
-             },
-             block3: {
-                 x: 0,
-                 y: 0,
-                 z: 1
-             },
-             block4: {
-                 x: 0,
-                 y: 1,
-                 z: 1
-             }             
-         }
-     },
-    FacingIn : {
-        YRotationOne : {
-            //these store the positions of the block relative to the first block 
-             block1: {
-                 x: 0,
-                 y: 0,
-                 z: 0
-             },
-             block2: {
-                 x: 0,
-                 y: 1,
-                 z: 0
-             },
-             block3: {
-                 x: -1,
-                 y: 1,
-                 z: 0
-             },
-             block4: {
-                 x: -1,
-                 y: 0,
-                 z: 0
-             }      
-        }
-     },
-    FacingOut : {
-        YRotationOne : {
-            //these store the positions of the block relative to the first block 
-             block1: {
-                 x: 0,
-                 y: 0,
-                 z: 0
-             },
-             block2: {
-                 x: 0,
-                 y: 1,
-                 z: 0
-             },
-             block3: {
-                 x: -1,
-                 y: 1,
-                 z: 0
-             },
-             block4: {
-                 x: -1,
-                 y: 0,
-                 z: 0
-             }      
-        }
-    }
-}
+    material: materialOrange,
+    blocks: [
+        {x: 0, y: 0, z: 0},
+        {x: 1, y: 0, z: 0},
+        {x: 1, y: 1, z: 0},
+        {x: 0, y: 1, z: 0},
+        {x: 0, y: 0, z: 1},
+        {x: 1, y: 0, z: 1},
+        {x: 1, y: 1, z: 1},
+        {x: 0, y: 1, z: 1}
+    ]
+ }
  
-
-
-
-
-
-
 
 //send x,y locations for z axis
 //y,z locations for x axis
@@ -499,10 +162,11 @@ function rotateHelper(cx, cy, x, y, angle) {
     return [nx, ny];
 }
 
-
 const Rotate = (state, directionString) => {
     let newState = { ...state }
-    
+    if(newState.currentFallingGroupType == BigSquare){
+        return newState;
+    }
     let validMove = true;
     let testX;
     let testY;
@@ -636,161 +300,35 @@ const Rotate = (state, directionString) => {
     return newState;
 }
 
-
-
-
-
-//receives the current game state, and the proposed changed blocks state, and return finalState
-// POSITION OF BLOCK 1 NEVER CHANGES, all rotations are relative to block 1
-const changeBlocksState = (finalState, newBlocksState) => {
-    let newState = { ...finalState}
-    let validMove = true;
-    let testX;
-    let testY;
-    let testZ;
-    let restingBlocks = []
-    for(let i = 0; i<newState.blocks.length; i++){
-        if(newState.blocks[i].userData.status != 'falling'){
-            restingBlocks.push(newState.blocks[i])
-        }
-    }
-    for(let i = 0; i<restingBlocks.length; i++){
-        //test block 2 vs restingblocks[i]
-        testX = newState.currentBlockGroup[0].position.x + newBlocksState.block2.x
-        testY = newState.currentBlockGroup[0].position.y + newBlocksState.block2.y
-        testZ = newState.currentBlockGroup[0].position.z + newBlocksState.block2.z
-        
-        if(testX == restingBlocks[i].position.x && Math.abs(testY - restingBlocks[i].position.y) < 1 && testZ == restingBlocks[i].position.z){
-            validMove = false; 
-            break;
-        }
-                                
-        //test block 3
-        testX = newState.currentBlockGroup[0].position.x + newBlocksState.block3.x
-        testY = newState.currentBlockGroup[0].position.y + newBlocksState.block3.y
-        testZ = newState.currentBlockGroup[0].position.z + newBlocksState.block3.z
-        
-        if(testX == restingBlocks[i].position.x && Math.abs(testY - restingBlocks[i].position.y) < 1 && testZ == restingBlocks[i].position.z){
-            validMove = false; 
-            break;
-        }
-        
-        //test block 4
-        testX = newState.currentBlockGroup[0].position.x + newBlocksState.block4.x
-        testY = newState.currentBlockGroup[0].position.y + newBlocksState.block4.y
-        testZ = newState.currentBlockGroup[0].position.z + newBlocksState.block4.z
-        
-        if(testX == restingBlocks[i].position.x && Math.abs(testY - restingBlocks[i].position.y) < 1 && testZ == restingBlocks[i].position.z){
-            validMove = false; 
-            break;
-        }
-    }
-    //test block 2 ob
-    testX = newState.currentBlockGroup[0].position.x + newBlocksState.block2.x
-    testY = newState.currentBlockGroup[0].position.y + newBlocksState.block2.y
-    testZ = newState.currentBlockGroup[0].position.z + newBlocksState.block2.z
-    if(testX > 2.5 || testX < -2.5 || testZ > 2.5 || testZ < -2.5){
-        validMove = false; 
-    }        
-    //test block 3 ob
-    testX = newState.currentBlockGroup[0].position.x + newBlocksState.block3.x
-    testY = newState.currentBlockGroup[0].position.y + newBlocksState.block3.y
-    testZ = newState.currentBlockGroup[0].position.z + newBlocksState.block3.z
-    if(testX > 2.5 || testX < -2.5 || testZ > 2.5 || testZ < -2.5){
-        validMove = false; 
-    }     
-    //test block 4 ob
-    testX = newState.currentBlockGroup[0].position.x + newBlocksState.block4.x
-    testY = newState.currentBlockGroup[0].position.y + newBlocksState.block4.y
-    testZ = newState.currentBlockGroup[0].position.z + newBlocksState.block4.z
-    if(testX > 2.5 || testX < -2.5 || testZ > 2.5 || testZ < -2.5){
-        validMove = false; 
-    }     
-    
-    if(validMove){
-        //block 2
-        newState.currentBlockGroup[1].position.x = newState.currentBlockGroup[0].position.x + newBlocksState.block2.x
-        newState.currentBlockGroup[1].position.y = newState.currentBlockGroup[0].position.y + newBlocksState.block2.y
-        newState.currentBlockGroup[1].position.z = newState.currentBlockGroup[0].position.z + newBlocksState.block2.z
-    
-        //block 3
-        newState.currentBlockGroup[2].position.x = newState.currentBlockGroup[0].position.x + newBlocksState.block3.x
-        newState.currentBlockGroup[2].position.y = newState.currentBlockGroup[0].position.y + newBlocksState.block3.y
-        newState.currentBlockGroup[2].position.z = newState.currentBlockGroup[0].position.z + newBlocksState.block3.z
-        
-        //block 4 
-        newState.currentBlockGroup[3].position.x = newState.currentBlockGroup[0].position.x + newBlocksState.block4.x
-        newState.currentBlockGroup[3].position.y = newState.currentBlockGroup[0].position.y + newBlocksState.block4.y
-        newState.currentBlockGroup[3].position.z = newState.currentBlockGroup[0].position.z + newBlocksState.block4.z
-        newState.successOnRotate = true;
-    }
-    else{
-        newState.successOnRotate = false;
-    }
-    return newState;
-}
-
-
 const checkCompletedRows = (state) => {
     const newState = { ...state }
     
     return newState
 }
 
+const typeArr = [FourVert, TShape, ZShape, LShape, BigSquare]
+const generateRandomGroupType = () => {
+    return typeArr[Math.floor(Math.random() * 5)]
+}
+
+
 const newBlockGroup = (state) => {
     let newState = { ...state }
     newState.currentFallingGroupType = newState.nextGroupType;
+    console.log(newState.currentFallingGroupType)
+    newState.nextGroupType = generateRandomGroupType();
     newState.currentBlockGroup = []
-    //every group has four blocks and starting position
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    const box1 = new THREE.Mesh(geometry, newState.currentFallingGroupType.material);
-    const box2 = new THREE.Mesh(geometry, newState.currentFallingGroupType.material);
-    const box3 = new THREE.Mesh(geometry, newState.currentFallingGroupType.material);
-    const box4 = new THREE.Mesh(geometry, newState.currentFallingGroupType.material);
-    
-    box1.userData.status = 'falling'; //box status property is used to denote its state of 'falling' or 'resting'
-    
-    //data for rotating group 
-    box1.userData.head = true;
-
-    newState.headFacing = 'FacingDown';
-    newState.yRotation = 1;
-    
-    box2.userData.status = 'falling';
-    box3.userData.status = 'falling';
-    box4.userData.status = 'falling';
-    
-    box1.position.y = 20 ;
-    box1.position.x = 0.5;
-    box1.position.z = 0.5;
-
-    box2.position.x = box1.position.x + newState.currentFallingGroupType.FacingDown.YRotationOne.block2.x
-    box2.position.y = box1.position.y + newState.currentFallingGroupType.FacingDown.YRotationOne.block2.y
-    box2.position.z = box1.position.z + newState.currentFallingGroupType.FacingDown.YRotationOne.block2.z
-            
-    box3.position.x = box1.position.x + newState.currentFallingGroupType.FacingDown.YRotationOne.block3.x
-    box3.position.y = box1.position.y + newState.currentFallingGroupType.FacingDown.YRotationOne.block3.y
-    box3.position.z = box1.position.z + newState.currentFallingGroupType.FacingDown.YRotationOne.block3.z
-            
-    box4.position.x = box1.position.x + newState.currentFallingGroupType.FacingDown.YRotationOne.block4.x
-    box4.position.y = box1.position.y + newState.currentFallingGroupType.FacingDown.YRotationOne.block4.y
-    box4.position.z = box1.position.z + newState.currentFallingGroupType.FacingDown.YRotationOne.block4.z
-            
-           
-            
-    newState.scene.add(box1);
-    newState.blocks.push(box1);
-    newState.scene.add(box2);
-    newState.blocks.push(box2);
-    newState.scene.add(box3);
-    newState.blocks.push(box3);
-    newState.scene.add(box4);
-    newState.blocks.push(box4);
-    newState.currentBlockGroup.push(box1)
-    newState.currentBlockGroup.push(box2)
-    newState.currentBlockGroup.push(box3)
-    newState.currentBlockGroup.push(box4)
-    
+    const geometry = new THREE.BoxGeometry(1, 1, 1); //move this so its only declared at init
+    for(let i = 0; i<newState.currentFallingGroupType.blocks.length; i++){
+        const box = new THREE.Mesh(geometry, newState.currentFallingGroupType.material);
+        box.userData.status = 'falling'; //status is used for collision detections
+        box.position.y = GAME_HEIGHT + newState.currentFallingGroupType.blocks[i].y;
+        box.position.x = 0.5 + newState.currentFallingGroupType.blocks[i].x;
+        box.position.z = 0.5 + newState.currentFallingGroupType.blocks[i].z;
+        newState.scene.add(box);
+        newState.blocks.push(box);
+        newState.currentBlockGroup.push(box);
+    }
     return newState;
 }
 
@@ -968,8 +506,6 @@ const TranslateFallingGroup = (state, direction) => {
     
     return newState
 }
-
-
 
 class VizViewer extends Component {
     constructor(props){
