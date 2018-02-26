@@ -86,6 +86,7 @@ const render3js = () => {
 
 //game height variable
 let GAME_HEIGHT = 20;
+let GAME_WIDTH = 6;
 
 //define colors
 const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 ,transparent: true, opacity: 0.5});
@@ -103,7 +104,7 @@ const FourVert = {
     ]
  }
  
- const TShape = {
+const TShape = {
     material: materialOrange,
     blocks: [
         {x: 0, y: 0, z: 0},
@@ -113,7 +114,7 @@ const FourVert = {
     ]
  }
  
- const ZShape = {
+const ZShape = {
     material: materialOrange,
     blocks: [
         {x: 0, y: 0, z: 0},
@@ -132,7 +133,6 @@ const LShape = {
         {x: 1, y: 0, z: 0}
     ]
  }
- 
  
 const BigSquare = {
     material: materialOrange,
@@ -300,9 +300,29 @@ const Rotate = (state, directionString) => {
     return newState;
 }
 
+
+//** Currently working on this function **/
 const checkCompletedRows = (state) => {
     const newState = { ...state }
-    
+    let yCheck = 0.5;
+    let rowOfBlocks = [];
+    let currentRestingBlocks = [];
+    let counter = 0; //counts num of blocks resting at that height
+    let total = GAME_WIDTH * GAME_WIDTH;
+    for(let p = 0; p<newState.blocks.length; p++){
+        if(newState.blocks[p].userData.status === 'resting'){
+            currentRestingBlocks.push(newState.blocks[p]);
+        }
+    }
+    //check each level
+    //Math.abs(testBlocks[p].y - newState.blocks[i].position.y) < 1
+    for(let i = 0; i<GAME_HEIGHT; i++){
+        for(let p = 0; p<GAME_WIDTH; p++){
+            for(let z = 0; z<GAME_WIDTH; z++){
+                
+            }
+        }
+    }
     return newState
 }
 
@@ -310,7 +330,6 @@ const typeArr = [FourVert, TShape, ZShape, LShape, BigSquare]
 const generateRandomGroupType = () => {
     return typeArr[Math.floor(Math.random() * 5)]
 }
-
 
 const newBlockGroup = (state) => {
     let newState = { ...state }
@@ -331,7 +350,6 @@ const newBlockGroup = (state) => {
     }
     return newState;
 }
-
 
 const TranslateFallingGroup = (state, direction) => {
     const newState = { ...state }
