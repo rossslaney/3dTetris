@@ -92,6 +92,7 @@ let GAME_WIDTH = 6;
 const materialOrange = new THREE.MeshBasicMaterial({ color: 0xffa500 ,transparent: true, opacity: 0.5});
 const materialBlue = new THREE.MeshBasicMaterial({ color: 0x0900ff ,transparent: true, opacity: 0.5});
 const materialGreen = new THREE.MeshBasicMaterial({ color: 0x00FF09 ,transparent: true, opacity: 0.5});
+const materialWhite = new THREE.MeshBasicMaterial({ color: 0xffffff });
 //...
 
 const FourVert = {
@@ -105,7 +106,7 @@ const FourVert = {
  }
  
 const TShape = {
-    material: materialOrange,
+    material: materialBlue,
     blocks: [
         {x: 0, y: 0, z: 0},
         {x: 0, y: 1, z: 0},
@@ -115,7 +116,7 @@ const TShape = {
  }
  
 const ZShape = {
-    material: materialOrange,
+    material: materialGreen,
     blocks: [
         {x: 0, y: 0, z: 0},
         {x: 1, y: 0, z: 0},
@@ -301,28 +302,64 @@ const Rotate = (state, directionString) => {
 }
 
 
+const wait = (ms) => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}
+
+
 //** Currently working on this function **/
 const checkCompletedRows = (state) => {
     const newState = { ...state }
-    let yCheck = 0.5;
-    let rowOfBlocks = [];
     let currentRestingBlocks = [];
-    let counter = 0; //counts num of blocks resting at that height
     let total = GAME_WIDTH * GAME_WIDTH;
+    let blocksByHeight = [...new Array(GAME_HEIGHT)].map(x => 0);
+    let deleteBlocks = [];
     for(let p = 0; p<newState.blocks.length; p++){
         if(newState.blocks[p].userData.status === 'resting'){
-            currentRestingBlocks.push(newState.blocks[p]);
+            currentRestingBlocks.push({height: Math.round(newState.blocks[p].position.y), block: newState.blocks[p]})
         }
     }
-    //check each level
-    //Math.abs(testBlocks[p].y - newState.blocks[i].position.y) < 1
-    for(let i = 0; i<GAME_HEIGHT; i++){
-        for(let p = 0; p<GAME_WIDTH; p++){
-            for(let z = 0; z<GAME_WIDTH; z++){
-                
+    //if all the blocks are resting, then check for levels
+    if(currentRestingBlocks.length == newState.blocks.length){
+        for(let i = 0; i<currentRestingBlocks.length; i++){
+            let blockHeight = Math.round(currentRestingBlocks[i].block.position.y);
+            blocksByHeight[blockHeight] += 1;
+        }
+
+    }
+    //check if any value in blocksByHeight = total
+    let height = blocksByHeight.indexOf(total);
+    console.log('height: ', height)
+    if(height != -1){
+        //get all block at height, set material to white, wait a timeout, and then delete
+        
+        for(let i = 0; i<currentRestingBlocks.length; i++){
+                console.log('inside timeout function')
+                if(currentRestingBlocks[i].height == height){
+                    let block = currentRestingBlocks[i].block;
+                    deleteBlocks.push(block);
+                    block.material = materialWhite;                  
+                }
+        }
+        
+        wait(500).then(() => {
+            for(let p= 0; p<deleteBlocks.length; p++){
+                console.log('inside delete blockds')
+                newState.scene.remove(deleteBlocks[p])
+                let index = newState.blocks.indexOf(deleteBlocks[p]);
+                console.log('index: ', index)
+                if (index > -1) {
+                    console.log('inside remove from game blocks')
+                    newState.blocks.splice(index, 1);
+                }
             }
-        }
+        });
+
+        //ADD TO SCORE
     }
+    
     return newState
 }
 
@@ -348,6 +385,7 @@ const newBlockGroup = (state) => {
         newState.blocks.push(box);
         newState.currentBlockGroup.push(box);
     }
+    console.log(newState)
     return newState;
 }
 
