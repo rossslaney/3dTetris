@@ -356,6 +356,11 @@ const checkCompletedRows = (state) => {
                 }
             }
         });
+        
+        //move resting blocks above the height level down one
+        for(let i = 0; i<newState.restingBlocks.length; i++){
+            newState.restingBlocks[i].userData.status = 'falling';
+        }
 
         //ADD TO SCORE
     }
