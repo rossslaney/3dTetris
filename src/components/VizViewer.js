@@ -265,8 +265,7 @@ const Rotate = (state, directionString) => {
     //test new locations against resting blocks
     for(let i = 0; i<newState.blocks.length; i++){
         if(newState.blocks[i].userData.status != 'falling'){
-            //restingBlocks.push(newState.blocks[i])
-            for(let p = 0; i<testBlocks.length; i++){
+            for(let p = 0; p<testBlocks.length; p++){
                  if(testBlocks[p].x == newState.blocks[i].position.x && Math.abs(testBlocks[p].y - newState.blocks[i].position.y) < 1 && testBlocks[p].z == newState.blocks[i].position.z){
                     validMove = false; 
                     break;
@@ -276,6 +275,7 @@ const Rotate = (state, directionString) => {
     }
     
     //place blocks in new locations if valid move
+    console.log(validMove);
     if(validMove){
         for(let i = 0; i<testBlocks.length; i++){
             newState.currentBlockGroup[i].position.x = testBlocks[i].x;
@@ -286,18 +286,6 @@ const Rotate = (state, directionString) => {
     else{
         newState.successOnRotate = false;
     }   
-    
-    
-    
-    /* OLD hardcoded way of rotating blocks
-    let newRotationState = whatIsNextRotationState(newState.headFacing, directionString, newState.yRotation)
-    if(newRotationState != undefined){
-        newState = changeBlocksState(newState, newState.currentFallingGroupType[newRotationState.Facing][newRotationState.yRotation])
-        if(newState.successOnRotate){
-            newState.headFacing = newRotationState.Facing;
-        }        
-    }
-    */
     return newState;
 }
 
